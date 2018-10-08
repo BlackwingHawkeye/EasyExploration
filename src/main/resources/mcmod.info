@@ -1,0 +1,23 @@
+[
+  {
+    "modid": "easyexploration",
+    "name": "Easy Exploration",
+    "description": "Makes exploring easier.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "updateJSON": "",
+    "authorList": [
+      "BlackwingHawkeye"
+    ],
+    "credits": "The Forge and FML guys, for creating mod support. And BlackwingHawkeye for creating this mod.",
+    "logoFile": "assets/easyExploration/textures/BHE.png",
+    "screenshots": [],
+    "parent": "",
+    "useDependencyInformation": false,
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": []
+  }
+]

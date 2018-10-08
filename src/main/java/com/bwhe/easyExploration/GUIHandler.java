@@ -1,4 +1,4 @@
-package com.tp.easyExploration;
+package com.bwhe.easyExploration;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;

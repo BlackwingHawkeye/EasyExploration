@@ -1,6 +1,6 @@
-package com.tp.easyExploration.keepInventory;
+package com.bwhe.easyExploration.keepInventory;
 
-import com.tp.easyExploration.config.Config;
+import com.bwhe.easyExploration.config.Config;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;

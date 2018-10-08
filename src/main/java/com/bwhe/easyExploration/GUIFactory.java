@@ -1,4 +1,4 @@
-package com.tp.easyExploration;
+package com.bwhe.easyExploration;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;

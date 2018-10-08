@@ -1,6 +1,7 @@
-package com.tp.easyExploration;
+package com.bwhe.easyExploration;
 
-import com.tp.easyExploration.config.Config;
+import com.bwhe.easyExploration.showDeathLocation.EventHandler;
+import com.bwhe.easyExploration.config.Config;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -51,8 +52,8 @@ public class EasyExploration {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         // some example code
-        MinecraftForge.EVENT_BUS.register(new com.tp.easyExploration.keepInventory.EventHandler(logger));
-        MinecraftForge.EVENT_BUS.register(new com.tp.easyExploration.showDeathLocation.EventHandler(logger));
+        MinecraftForge.EVENT_BUS.register(new com.bwhe.easyExploration.keepInventory.EventHandler(logger));
+        MinecraftForge.EVENT_BUS.register(new EventHandler(logger));
         logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
     }
 }

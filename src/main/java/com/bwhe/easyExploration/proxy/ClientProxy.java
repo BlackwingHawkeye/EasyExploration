@@ -1,4 +1,4 @@
-package com.tp.easyExploration.proxy;
+package com.bwhe.easyExploration.proxy;
 
 public class ClientProxy extends CommonProxy {
     public void init() {

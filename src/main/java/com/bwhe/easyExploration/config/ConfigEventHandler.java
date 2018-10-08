@@ -1,6 +1,6 @@
-package com.tp.easyExploration.config;
+package com.bwhe.easyExploration.config;
 
-import com.tp.easyExploration.EasyExploration;
+import com.bwhe.easyExploration.EasyExploration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

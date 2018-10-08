@@ -1,6 +1,6 @@
-package com.tp.easyExploration.showDeathLocation;
+package com.bwhe.easyExploration.showDeathLocation;
 
-import com.tp.easyExploration.config.Config;
+import com.bwhe.easyExploration.config.Config;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;

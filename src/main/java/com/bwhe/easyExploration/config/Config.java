@@ -1,6 +1,6 @@
-package com.tp.easyExploration.config;
+package com.bwhe.easyExploration.config;
 
-import com.tp.easyExploration.EasyExploration;
+import com.bwhe.easyExploration.EasyExploration;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;

@@ -21,12 +21,15 @@ public class EventHandler {
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
-        if (EasyExplorationConfig.showDeathLocation.enabled) {
-            if (event.getEntity() instanceof EntityPlayerMP) {
-                EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
-                player.sendMessage(new TextComponentString(getMessage(player)));
-                logger.info(getMessage(player));
-            }
-        }
+        if (!EasyExplorationConfig.showDeathLocation.enabled) return;
+        if (!(event.getEntity() instanceof EntityPlayerMP)) return;
+
+        EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
+        String message = getMessage(player);
+        player.sendMessage(new TextComponentString(message));
+        logger.info("Notified Player: " + message);
     }
+
+    //TODO: find dimension name
+    //TODO: create config notify (all on server) / notify team / notify (dead) player
 }

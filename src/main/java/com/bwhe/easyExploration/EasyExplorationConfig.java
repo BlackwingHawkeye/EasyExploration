@@ -37,4 +37,7 @@ public class EasyExplorationConfig {
         public boolean enabled = true;
     }
 
+    //TODO: onLoad: read from file
+    //TODO: onGUIchange: save to file
+    //TODO: onGUIchange: update
 }

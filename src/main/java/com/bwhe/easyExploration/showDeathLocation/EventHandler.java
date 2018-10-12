@@ -3,6 +3,7 @@ package com.bwhe.easyExploration.showDeathLocation;
 import com.bwhe.easyExploration.EasyExplorationConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,8 @@ public class EventHandler {
     }
 
     private String getMessage(EntityPlayerMP player) {
+        logger.info("Dimension world type name: " + DimensionManager.getWorld(player.dimension).getWorldType().getName());
+        logger.info("Dimension world name: " + DimensionManager.getWorld(player.dimension).getWorldInfo().getWorldName());
         return player.getName() + " died in dimension " + player.dimension + " at X/Y/Z " + (int) Math.ceil(player.posX) + "/" + (int) Math.ceil(player.posY) + "/" + (int) Math.ceil(player.posZ);
     }
 

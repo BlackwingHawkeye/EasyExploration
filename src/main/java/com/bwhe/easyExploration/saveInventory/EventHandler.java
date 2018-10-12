@@ -49,15 +49,15 @@ public class EventHandler {
 
     private void keepStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
         if (target == null) {
-            logger.info("Target inventory missing.");
+            logger.error("Target inventory missing.");
             return;
         }
         if (source == null) {
-            logger.info("Source inventory missing.");
+            logger.error("Source inventory missing.");
             return;
         }
         if (target.size() != source.size()) {
-            logger.info("Target inventory has wrong size.");
+            logger.error("Target inventory has wrong size.");
             return;
         }
         for (int i = 0; i < target.size(); ++i) target.set(i, source.get(i));
@@ -66,7 +66,7 @@ public class EventHandler {
 
     private void safeStacks(NonNullList<ItemStack> source) {
         if (source == null) {
-            logger.info("source inventory missing.");
+            logger.warn("source inventory missing.");
             return;
         }
         for (ItemStack stack : source) deathChest.addItem(stack);
@@ -91,8 +91,16 @@ public class EventHandler {
             safeStacks(player.inventory.offHandInventory);
         }
         if (config.loot == InventoryOption.SAVE) {
-            logger.info("Saving equipment.");
+            logger.info("Saving loot.");
             safeStacks(player.inventory.mainInventory);
+        }
+        if (config.equipment == InventoryOption.DROP) {
+            logger.info("Dropping equipment.");
+            // happens automatically since we don't cancel the event and don't remove the items from the inventory
+        }
+        if (config.loot == InventoryOption.DROP) {
+            logger.info("Dropping loot.");
+            // happens automatically since we don't cancel the event and don't remove the items from the inventory
         }
     }
 
@@ -106,10 +114,6 @@ public class EventHandler {
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
         logger.info(player.getName() + " died. Attempting to save inventory.", player);
         int playerInventoryCount = countInventoryPlayer(player.inventory);
-        logger.info(player.inventory.armorInventory);
-        logger.info(player.inventory.mainInventory);
-        logger.info(player.inventory.offHandInventory);
-
         moveInventory(player);
         logger.info("Kept " + countInventoryPlayer(inventory) + " and saved " + countInventoryBasic(deathChest) + " of " + playerInventoryCount + " item stacks.");
     }
@@ -124,11 +128,11 @@ public class EventHandler {
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
         logger.info(player.getName() + " respawned. Attempting to restore inventory.", event.getOriginal());
         if (inventory == null) {
-            logger.info("No saved inventory found.");
+            logger.warn("No saved inventory found.");
             return;
         }
-        if (inventory.player != player) {
-            logger.info("No saved inventory found for player" + player.getName() + ".");
+        if (inventory.player.getGameProfile().getId() != player.getGameProfile().getId()) {
+            logger.error("No saved inventory found for player" + player.getName() + ".");
             return;
         }
         player.inventory.copyInventory(inventory);

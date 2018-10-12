@@ -5,9 +5,9 @@
     "description": "Makes exploring easier.",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "",
-    "updateUrl": "",
-    "updateJSON": "",
+    "url": "https://minecraft.curseforge.com/projects/easy-exploration/",
+    "updateUrl": "https://minecraft.curseforge.com/projects/easy-exploration/files",
+    "updateJSON": "https://minecraft.curseforge.com/projects/easy-exploration/files/update.json",
     "authorList": [
       "BlackwingHawkeye"
     ],

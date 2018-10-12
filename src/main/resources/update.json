@@ -1,0 +1,13 @@
+{
+  "homepage": "https://minecraft.curseforge.com/projects/easy-exploration",
+  // List all versions of your mod for the given Minecraft version, along with their changelogs
+  "1.12": {
+    "1.0-1.12": "1.0"
+  },
+  "promos": {
+    // Declare the latest "bleeding-edge" version of your mod for the given Minecraft version
+    "1.12-latest": "1.0.5",
+    // Declare the latest "stable" version of your mod for the given Minecraft version
+    "1.12-recommended": "1.0.3"
+  }
+}

@@ -4,6 +4,7 @@ import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
 import com.bwhe.easyExploration.config.EasyExplorationConfig;
 import com.bwhe.easyExploration.config.EasyExplorationConfig.InventoryOption;
 import com.bwhe.easyExploration.config.EasyExplorationConfig.SubCategorySaveInventory;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
@@ -105,9 +106,14 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         // TODO place death chest
     }
 
-    private String getSide(EntityPlayerMP player) {
-        if (player.world.isRemote) return "Client";
-        else return "Server";
+    private void destroyVanishingCursedItems(InventoryPlayer inventory) {
+        for (int i = 0; i < inventory.getSizeInventory(); ++i) {
+            ItemStack itemstack = inventory.getStackInSlot(i);
+
+            if (!itemstack.isEmpty() && EnchantmentHelper.hasVanishingCurse(itemstack)) {
+                inventory.removeStackFromSlot(i);
+            }
+        }
     }
 
     @Mod.EventHandler
@@ -129,6 +135,7 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
 
         logger.info(player.getGameProfile().getName() + " died. Attempting to save inventory.");
         int totalInventoryCount = countInventoryPlayer(player.inventory);
+        destroyVanishingCursedItems(player.inventory);
         moveInventory(player);
         logger.info("Kept {} and saved {} of {} item stacks.", countInventoryPlayer(inventories.get(player.getGameProfile().getId())), countInventoryBasic(deathChest), totalInventoryCount);
     }

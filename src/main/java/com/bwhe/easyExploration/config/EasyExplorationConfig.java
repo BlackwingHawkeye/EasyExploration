@@ -1,10 +1,20 @@
-package com.bwhe.easyExploration;
+package com.bwhe.easyExploration.config;
 
 import net.minecraftforge.common.config.Config;
 
-@Config(modid = EasyExploration.MODID, category = "")
+import static com.bwhe.easyExploration.EasyExploration.MODID;
+
+@Config(modid = MODID, category = "")
 public class EasyExplorationConfig {
-    public enum InventoryOption {KEEP, SAVE, DROP}
+
+    public enum InventoryOption {
+        @Config.Comment("items stay on your avatar")
+        KEEP,
+        @Config.Comment("items are stored in a loot crate at death location")
+        SAVE,
+        @Config.Comment("item get dropped at death location")
+        DROP
+    }
 
     public static SubCategorySaveInventory saveInventory = new SubCategorySaveInventory();
 
@@ -32,12 +42,11 @@ public class EasyExplorationConfig {
 
     public static SubCategory sleepingBags = new SubCategory();
 
+    public static SubCategory showDamage = new SubCategory();
+
     public static class SubCategory {
         @Config.Comment("toggle feature on/off")
         public boolean enabled = true;
     }
 
-    //TODO: onLoad: read from file
-    //TODO: onGUIchange: save to file
-    //TODO: onGUIchange: update
 }

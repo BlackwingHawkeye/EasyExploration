@@ -1,8 +1,9 @@
 package com.bwhe.easyExploration.saveInventory;
 
-import com.bwhe.easyExploration.EasyExplorationConfig;
-import com.bwhe.easyExploration.EasyExplorationConfig.InventoryOption;
-import com.bwhe.easyExploration.EasyExplorationConfig.SubCategorySaveInventory;
+import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
+import com.bwhe.easyExploration.config.EasyExplorationConfig;
+import com.bwhe.easyExploration.config.EasyExplorationConfig.InventoryOption;
+import com.bwhe.easyExploration.config.EasyExplorationConfig.SubCategorySaveInventory;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
@@ -10,23 +11,21 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class EventHandler {
-
-    private Logger logger;
-
-    public EventHandler(Logger logger) {
-        this.logger = logger;
-    }
-
-    private InventoryPlayer inventory = null;
-    private InventoryBasic deathChest = null;
+public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandlerBasic {
 
     private SubCategorySaveInventory config = EasyExplorationConfig.saveInventory;
+    private Map<UUID, InventoryPlayer> inventories = new HashMap<UUID, InventoryPlayer>();
+    private InventoryBasic deathChest;
 
     private int countInventoryPlayer(InventoryPlayer inv) {
         if (inv == null) return 0;
@@ -74,7 +73,7 @@ public class EventHandler {
     }
 
     private void moveInventory(EntityPlayerMP player) {
-        inventory = new InventoryPlayer(player);
+        InventoryPlayer inventory = new InventoryPlayer(player);
         deathChest = new InventoryBasic(player.getName() + "'s loot crate", true, inventory.armorInventory.size() + inventory.offHandInventory.size() + inventory.mainInventory.size());
         if (config.equipment == InventoryOption.KEEP) {
             logger.info("Keeping equipment.");
@@ -102,6 +101,20 @@ public class EventHandler {
             logger.info("Dropping loot.");
             // happens automatically since we don't cancel the event and don't remove the items from the inventory
         }
+        inventories.put(player.getGameProfile().getId(), inventory);
+        // TODO place death chest
+    }
+
+    private String getSide(EntityPlayerMP player) {
+        if (player.world.isRemote) return "Client";
+        else return "Server";
+    }
+
+    @Mod.EventHandler
+    public void onPostInit(FMLPostInitializationEvent event) {
+        // feature is disabled
+        if (!config.enabled) return;
+        // TODO load inventories from file
     }
 
     @SubscribeEvent
@@ -110,12 +123,14 @@ public class EventHandler {
         if (!config.enabled) return;
         // someone else / something else died
         if (!(event.getEntity() instanceof EntityPlayerMP)) return;
-
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
-        logger.info(player.getName() + " died. Attempting to save inventory.", player);
-        int playerInventoryCount = countInventoryPlayer(player.inventory);
+        // MC own features trump mine
+        if (player.world.getGameRules().getBoolean("keepInventory") || player.isSpectator()) return;
+
+        logger.info(player.getGameProfile().getName() + " died. Attempting to save inventory.");
+        int totalInventoryCount = countInventoryPlayer(player.inventory);
         moveInventory(player);
-        logger.info("Kept " + countInventoryPlayer(inventory) + " and saved " + countInventoryBasic(deathChest) + " of " + playerInventoryCount + " item stacks.");
+        logger.info("Kept {} and saved {} of {} item stacks.", countInventoryPlayer(inventories.get(player.getGameProfile().getId())), countInventoryBasic(deathChest), totalInventoryCount);
     }
 
     @SubscribeEvent
@@ -124,20 +139,27 @@ public class EventHandler {
         if (!config.enabled) return;
         // someone else / something else was cloned
         if (!(event.isWasDeath() && event.getEntity() instanceof EntityPlayerMP)) return;
-
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
-        logger.info(player.getName() + " respawned. Attempting to restore inventory.", event.getOriginal());
-        if (inventory == null) {
-            logger.warn("No saved inventory found.");
+        // MC own features trump mine
+        if (player.world.getGameRules().getBoolean("keepInventory") || player.isSpectator()) return;
+
+        logger.info(player.getGameProfile().getName() + " respawned. Attempting to restore inventory.");
+        if (!(inventories.containsKey(player.getGameProfile().getId()))) {
+            logger.error("No saved inventory found for player {}.", player.getGameProfile().getName());
             return;
         }
-        if (inventory.player.getGameProfile().getId() != player.getGameProfile().getId()) {
-            logger.error("No saved inventory found for player" + player.getName() + ".");
-            return;
-        }
-        player.inventory.copyInventory(inventory);
-        logger.info("Restored " + countInventoryPlayer(player.inventory) + "/" + countInventoryPlayer(inventory) + " item stacks.");
+        int totalInventoryCount = countInventoryPlayer(inventories.get(player.getGameProfile().getId()));
+        player.inventory.copyInventory(inventories.get(player.getGameProfile().getId()));
+        logger.info("Restored {} of {} item stacks.", countInventoryPlayer(player.inventory), totalInventoryCount);
     }
+
+    @Mod.EventHandler
+    public void onStopping(FMLServerStoppingEvent event) {
+        // feature is disabled
+        if (!config.enabled) return;
+        // TODO write inventories to file
+    }
+
 
     //TODO: on login/logout make stuff not available for same player on other gameworlds (p1 dies, logout, change world, login, respawn)
     //TODO: on login/logout write to file to make stuff available aften game restart (p1 dies, logout, quit game, start game, login, respawn)

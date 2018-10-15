@@ -1,20 +1,14 @@
 package com.bwhe.easyExploration.showDeathLocation;
 
-import com.bwhe.easyExploration.EasyExplorationConfig;
+import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
+import com.bwhe.easyExploration.config.EasyExplorationConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.apache.logging.log4j.Logger;
 
-public class EventHandler {
-
-    private Logger logger;
-
-    public EventHandler(Logger logger) {
-        this.logger = logger;
-    }
+public class ShowDeathLocationEventHandler extends EasyExplorationEventHandlerBasic {
 
     private String getMessage(EntityPlayerMP player) {
         logger.info("Dimension world type name: " + DimensionManager.getWorld(player.dimension).getWorldType().getName());

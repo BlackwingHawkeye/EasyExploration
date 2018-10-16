@@ -1,8 +1,9 @@
 package com.bwhe.easyExploration;
 
-import com.bwhe.easyExploration.config.EasyExplorationConfigEventHandler;
+import com.bwhe.easyExploration.config.EasyExplorationConfigEventHandlerCommon;
 import com.bwhe.easyExploration.saveInventory.SaveInventoryEventHandlerCommon;
-import com.bwhe.easyExploration.showDeathLocation.ShowDeathLocationEventHandler;
+import com.bwhe.easyExploration.showDamage.ShowDamageEventHandlerClient;
+import com.bwhe.easyExploration.showDeathLocation.ShowDeathLocationEventHandlerCommon;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -27,9 +28,10 @@ public class EasyExploration extends EasyExplorationEventHandlerBasic {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         super.onPreInit(event);
-        (new EasyExplorationConfigEventHandler()).onPreInit(event);
+        (new EasyExplorationConfigEventHandlerCommon()).onPreInit(event);
         saveInventoryEventHandler.onPreInit(event);
-        (new ShowDeathLocationEventHandler()).onPreInit(event);
+        (new ShowDeathLocationEventHandlerCommon()).onPreInit(event);
+        (new ShowDamageEventHandlerClient()).onPreInit(event);
     }
 
     @Mod.EventHandler

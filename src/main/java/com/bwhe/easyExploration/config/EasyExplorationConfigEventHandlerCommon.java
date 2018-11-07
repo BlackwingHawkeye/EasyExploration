@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static com.bwhe.easyExploration.EasyExploration.MODID;
 
-public class EasyExplorationConfigEventHandler extends EasyExplorationEventHandlerBasic {
+public class EasyExplorationConfigEventHandlerCommon extends EasyExplorationEventHandlerBasic {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {

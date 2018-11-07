@@ -8,11 +8,11 @@ import net.minecraft.world.DimensionType;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ShowDeathLocationEventHandler extends EasyExplorationEventHandlerBasic {
+public class ShowDeathLocationEventHandlerCommon extends EasyExplorationEventHandlerBasic {
 
     private TextComponentString getMessage(EntityPlayerMP player) {
         return new TextComponentString(player.getName() + " died in "
-                + DimensionType.getById(player.dimension).getName() + "(id:" + player.dimension + ") at X/Y/Z "
+                + DimensionType.getById(player.dimension).getName() + " (id:" + player.dimension + ") at X/Y/Z "
                 + (int) Math.ceil(player.posX) + "/" + (int) Math.ceil(player.posY) + "/" + (int) Math.ceil(player.posZ)
         );
     }

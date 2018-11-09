@@ -5,6 +5,7 @@ import com.bwhe.easyExploration.EasyExplorationFileStorage;
 import com.bwhe.easyExploration.config.EasyExplorationConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -23,15 +24,9 @@ import java.io.IOException;
 
 public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandlerBasic {
 
-    private EasyExplorationConfig.SubCategorySaveInventory config;
-    private EasyExplorationFileStorage fileStorage;
-    private SaveInventory inventories;
-
-    public SaveInventoryEventHandlerCommon() {
-        this.config = EasyExplorationConfig.saveInventory;
-        this.fileStorage = new EasyExplorationFileStorage("saveinventory");
-        this.inventories = new SaveInventory(logger);
-    }
+    private static final EasyExplorationConfig.SubCategorySaveInventory config = EasyExplorationConfig.saveInventory;
+    private static final SaveInventory saveInventory = SaveInventory.instance();
+    private static final EasyExplorationFileStorage fileStorage = EasyExplorationFileStorage.instance("saveinventory");
 
     private boolean canNotDo(Entity entity) {
         // feature is disabled
@@ -59,18 +54,22 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
 
         try {
             final File playerFile = fileStorage.getPlayerSaveFile(event);
-            final NBTTagCompound compound = CompressedStreamTools.read(playerFile);
-            if (compound == null) throw new IOException("Can't read from file " + playerFile.getName());
+            // this is legit if the player is new in this game world
+            if (!playerFile.exists()) logger.warn("Player file not found. " + playerFile.getPath());
+            else {
+                final NBTTagCompound compound = CompressedStreamTools.read(playerFile);
+                if (compound == null) throw new IOException("Can't read from file " + playerFile.getPath());
 
-            playerInventory.readFromNBT(compound.getTagList("Inventory", 10));
-            playerInventory.currentItem = compound.getInteger("SelectedItemSlot");
+                playerInventory.readFromNBT(compound.getTagList("Inventory", 10));
+                playerInventory.currentItem = compound.getInteger("SelectedItemSlot");
 
-            logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+                logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+            }
         } catch (final Exception e) {
             logger.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
             logger.catching(e);
         } finally {
-            inventories.put(player, playerInventory);
+            saveInventory.put(player, playerInventory);
         }
     }
 
@@ -82,11 +81,11 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
     public void onLoggedIn(PlayerLoggedInEvent event) {
         // should we do something?
         if (canNotDo(event.player)) return;
-        final EntityPlayer player = event.player;
-        final InventoryPlayer playerInventory = inventories.get(player);
+        EntityPlayerMP player = (EntityPlayerMP) event.player;
 
-        // TODO: Send Client a package containing the inventory to be synced
-        // EasyExploration.NETWORK.sendTo(new PacketSyncClient(playerInventory), player);
+        logger.info("Player {} logged in. Sending sync package to player client.", player.getName());
+        // Send Client a package containing the inventory to be synced
+        player.sendContainerToPlayer(player.inventoryContainer);
     }
 
     @SubscribeEvent
@@ -96,14 +95,11 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         final EntityPlayer player = (EntityPlayer) event.getEntity();
         final int totalInventoryCount = SaveInventory.count(player.inventory);
 
-        if (totalInventoryCount == 0) logger.info(player.getName() + " died.");
-        else {
-            logger.info(player.getName() + " died. Attempting to save inventory.");
-            inventories.destroyVanishingCursedItems(player.inventory);
-            InventoryBasic deathChest = inventories.moveInventory(player);
-            logger.info("Kept {} and saved {} of {} item stacks.", SaveInventory.count(inventories.get(player)), SaveInventory.count(deathChest), totalInventoryCount);
-            // TODO: place deathChest
-        }
+        logger.info(player.getName() + " died. Attempting to save inventory.");
+        saveInventory.destroyVanishingCursedItems(player.inventory);
+        InventoryBasic deathChest = saveInventory.moveInventory(player);
+        logger.info("Kept {} and saved {} of {} item stacks.", SaveInventory.count(saveInventory.get(player)), SaveInventory.count(deathChest), totalInventoryCount);
+        // TODO: place deathChest
     }
 
     @SubscribeEvent
@@ -113,20 +109,19 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
-        final InventoryPlayer playerInventory = inventories.get(player);
+        final InventoryPlayer playerInventory = saveInventory.get(player);
 
-        if (playerInventory.isEmpty()) logger.info(player.getName() + " respawned.");
-        else {
-            logger.info(player.getName() + " respawned. Attempting to restore inventory.");
-            player.inventory.copyInventory(playerInventory);
-            logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
-        }
-        inventories.remove(player);
+        logger.info(player.getName() + " respawned. Attempting to restore inventory.");
+        player.inventory.copyInventory(playerInventory);
+        logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
+
+        saveInventory.remove(player);
     }
 
     @SubscribeEvent
     public void onLoggedOut(PlayerLoggedOutEvent event) {
-        inventories.remove(event.player); // needed, so that the inventory is not available on other (local) game worlds
+        logger.info("Player {} logged out. Removing inventory store from memory.", event.player.getName());
+        saveInventory.remove(event.player); // needed, so that the inventory is not available on other (local) game worlds
     }
 
     /**
@@ -139,28 +134,22 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
-        final InventoryPlayer playerInventory = inventories.get(player);
+        final InventoryPlayer playerInventory = saveInventory.get(player);
 
         try {
-            if (!playerInventory.isEmpty()) {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setTag("Inventory", playerInventory.writeToNBT(new NBTTagList()));
-                compound.setInteger("SelectedItemSlot", playerInventory.currentItem);
+            NBTTagCompound compound = new NBTTagCompound();
+            compound.setTag("Inventory", playerInventory.writeToNBT(new NBTTagList()));
+            compound.setInteger("SelectedItemSlot", playerInventory.currentItem);
 
-                CompressedStreamTools.safeWrite(compound, fileStorage.getPlayerSaveFile(event));
+            CompressedStreamTools.safeWrite(compound, fileStorage.getPlayerSaveFile(event));
 
-                logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
-            }
+            logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
         } catch (Exception e) {
             logger.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
             logger.catching(e);
-        } finally {
-            inventories.remove(player);
         }
     }
 
-//TODO: on login/logout make stuff not available for same player on other gameworlds (p1 dies, logout, change world, login, respawn)
-//TODO: on login/logout write to file to make stuff available aften game restart (p1 dies, logout, quit game, start game, login, respawn)
 //TODO: test if temp inventory is restored for other players (p1 dies, p2 dies, p1 respawns, p2 respawns)
 //TODO: place deathchest
 //TODO: lock deathchest

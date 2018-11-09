@@ -3,10 +3,25 @@ package com.bwhe.easyExploration;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.bwhe.easyExploration.EasyExploration.MODID;
 
 public class EasyExplorationFileStorage {
+
+    /**
+     * The singleton
+     */
+    private static final Map<String, EasyExplorationFileStorage> INSTANCES = new HashMap<>();
+
+    /**
+     * @return the instance
+     */
+    public static EasyExplorationFileStorage instance(String featureKey) {
+        if (!INSTANCES.containsKey(featureKey)) INSTANCES.put(featureKey, new EasyExplorationFileStorage(featureKey));
+        return INSTANCES.get(featureKey);
+    }
 
     private String modChildFolder;
     private String featureChildFolder;
@@ -62,7 +77,7 @@ public class EasyExplorationFileStorage {
      * @param uuid      The uuid of the player to get a file for.
      * @return The save file to use for the player.
      */
-    public File getPlayerSaveFile(File playerDir, String uuid) {
+    private File getPlayerSaveFile(File playerDir, String uuid) {
         return new File(getFeatureSaveDir(playerDir), uuid + ".dat");
     }
 

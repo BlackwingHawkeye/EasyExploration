@@ -1,177 +1,168 @@
 package com.bwhe.easyExploration.saveInventory;
 
 import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
+import com.bwhe.easyExploration.EasyExplorationFileStorage;
 import com.bwhe.easyExploration.config.EasyExplorationConfig;
-import com.bwhe.easyExploration.config.EasyExplorationConfig.InventoryOption;
-import com.bwhe.easyExploration.config.EasyExplorationConfig.SubCategorySaveInventory;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.Clone;
+import net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile;
+import net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.File;
+import java.io.IOException;
 
 public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandlerBasic {
 
-    private SubCategorySaveInventory config = EasyExplorationConfig.saveInventory;
-    private Map<UUID, InventoryPlayer> inventories = new HashMap<UUID, InventoryPlayer>();
-    private InventoryBasic deathChest;
+    private EasyExplorationConfig.SubCategorySaveInventory config;
+    private EasyExplorationFileStorage fileStorage;
+    private SaveInventory inventories;
 
-    private int countInventoryPlayer(InventoryPlayer inv) {
-        if (inv == null) return 0;
-        if (inv.getSizeInventory() <= 0) return 0;
-        AtomicInteger itemStackCount = new AtomicInteger(0);
-        for (ItemStack stack : inv.mainInventory) if (!stack.isEmpty()) itemStackCount.incrementAndGet();
-        for (ItemStack stack : inv.armorInventory) if (!stack.isEmpty()) itemStackCount.incrementAndGet();
-        for (ItemStack stack : inv.offHandInventory) if (!stack.isEmpty()) itemStackCount.incrementAndGet();
-        return itemStackCount.get();
+    public SaveInventoryEventHandlerCommon() {
+        this.config = EasyExplorationConfig.saveInventory;
+        this.fileStorage = new EasyExplorationFileStorage("saveinventory");
+        this.inventories = new SaveInventory(logger);
     }
 
-    private int countInventoryBasic(InventoryBasic inv) {
-        if (inv == null) return 0;
-        if (inv.getSizeInventory() <= 0) return 0;
-        AtomicInteger itemStackCount = new AtomicInteger(0);
-        for (int i = 0; i < inv.getSizeInventory(); ++i)
-            if (!inv.getStackInSlot(i).isEmpty()) itemStackCount.incrementAndGet();
-        return itemStackCount.get();
-    }
-
-    private void keepStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
-        if (target == null) {
-            logger.error("Target inventory missing.");
-            return;
-        }
-        if (source == null) {
-            logger.error("Source inventory missing.");
-            return;
-        }
-        if (target.size() != source.size()) {
-            logger.error("Target inventory has wrong size.");
-            return;
-        }
-        for (int i = 0; i < target.size(); ++i) target.set(i, source.get(i));
-        source.clear();
-    }
-
-    private void safeStacks(NonNullList<ItemStack> source) {
-        if (source == null) {
-            logger.warn("source inventory missing.");
-            return;
-        }
-        for (ItemStack stack : source) deathChest.addItem(stack);
-        source.clear();
-    }
-
-    private void moveInventory(EntityPlayerMP player) {
-        InventoryPlayer inventory = new InventoryPlayer(player);
-        deathChest = new InventoryBasic(player.getName() + "'s loot crate", true, inventory.armorInventory.size() + inventory.offHandInventory.size() + inventory.mainInventory.size());
-        if (config.equipment == InventoryOption.KEEP) {
-            logger.info("Keeping equipment.");
-            keepStacks(inventory.armorInventory, player.inventory.armorInventory);
-            keepStacks(inventory.offHandInventory, player.inventory.offHandInventory);
-        }
-        if (config.loot == InventoryOption.KEEP) {
-            logger.info("Keeping loot.");
-            keepStacks(inventory.mainInventory, player.inventory.mainInventory);
-        }
-        if (config.equipment == InventoryOption.SAVE) {
-            logger.info("Saving equipment.");
-            safeStacks(player.inventory.armorInventory);
-            safeStacks(player.inventory.offHandInventory);
-        }
-        if (config.loot == InventoryOption.SAVE) {
-            logger.info("Saving loot.");
-            safeStacks(player.inventory.mainInventory);
-        }
-        if (config.equipment == InventoryOption.DROP) {
-            logger.info("Dropping equipment.");
-            // happens automatically since we don't cancel the event and don't remove the items from the inventory
-        }
-        if (config.loot == InventoryOption.DROP) {
-            logger.info("Dropping loot.");
-            // happens automatically since we don't cancel the event and don't remove the items from the inventory
-        }
-        inventories.put(player.getGameProfile().getId(), inventory);
-        // TODO place death chest
-    }
-
-    private void destroyVanishingCursedItems(InventoryPlayer inventory) {
-        for (int i = 0; i < inventory.getSizeInventory(); ++i) {
-            ItemStack itemstack = inventory.getStackInSlot(i);
-
-            if (!itemstack.isEmpty() && EnchantmentHelper.hasVanishingCurse(itemstack)) {
-                inventory.removeStackFromSlot(i);
-            }
-        }
-    }
-
-    @Mod.EventHandler
-    public void onPostInit(FMLPostInitializationEvent event) {
+    private boolean canNotDo(Entity entity) {
         // feature is disabled
-        if (!config.enabled) return;
-        // TODO load inventories from file
+        if (!config.enabled) return true;
+        // not a player
+        if (!(entity instanceof EntityPlayer)) return true;
+        // MC own features trump mine
+        if (entity.world.getGameRules().getBoolean("keepInventory")) return true;
+        // player is not really here
+        if (((EntityPlayer) entity).isSpectator()) return true;
+        // all right, let's do that
+        return false;
+    }
+
+    /**
+     * The player is being loaded from the world save.
+     * Load an additional file from the players directory containing additional mod related player data.
+     */
+    @SubscribeEvent
+    public void onLoad(LoadFromFile event) {
+        // should we do something?
+        if (canNotDo(event.getEntity())) return;
+        final EntityPlayer player = event.getEntityPlayer();
+        final InventoryPlayer playerInventory = new InventoryPlayer(player);
+
+        try {
+            final File playerFile = fileStorage.getPlayerSaveFile(event);
+            final NBTTagCompound compound = CompressedStreamTools.read(playerFile);
+            if (compound == null) throw new IOException("Can't read from file " + playerFile.getName());
+
+            playerInventory.readFromNBT(compound.getTagList("Inventory", 10));
+            playerInventory.currentItem = compound.getInteger("SelectedItemSlot");
+
+            logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+        } catch (final Exception e) {
+            logger.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
+            logger.catching(e);
+        } finally {
+            inventories.put(player, playerInventory);
+        }
+    }
+
+    /**
+     * If the player is a valid server side player, their data will be synced to the client.
+     * Syncs a client's data with the data that is on the server. This can only be called server side.
+     */
+    @SubscribeEvent
+    public void onLoggedIn(PlayerLoggedInEvent event) {
+        // should we do something?
+        if (canNotDo(event.player)) return;
+        final EntityPlayer player = event.player;
+        final InventoryPlayer playerInventory = inventories.get(player);
+
+        // TODO: Send Client a package containing the inventory to be synced
+        // EasyExploration.NETWORK.sendTo(new PacketSyncClient(playerInventory), player);
     }
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
-        // feature is disabled
-        if (!config.enabled) return;
-        // someone else / something else died
-        if (!(event.getEntity() instanceof EntityPlayerMP)) return;
-        EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
-        // MC own features trump mine
-        if (player.world.getGameRules().getBoolean("keepInventory") || player.isSpectator()) return;
+        // should we do something?
+        if (canNotDo(event.getEntity())) return;
+        final EntityPlayer player = (EntityPlayer) event.getEntity();
+        final int totalInventoryCount = SaveInventory.count(player.inventory);
 
-        logger.info(player.getGameProfile().getName() + " died. Attempting to save inventory.");
-        int totalInventoryCount = countInventoryPlayer(player.inventory);
-        destroyVanishingCursedItems(player.inventory);
-        moveInventory(player);
-        logger.info("Kept {} and saved {} of {} item stacks.", countInventoryPlayer(inventories.get(player.getGameProfile().getId())), countInventoryBasic(deathChest), totalInventoryCount);
+        if (totalInventoryCount == 0) logger.info(player.getName() + " died.");
+        else {
+            logger.info(player.getName() + " died. Attempting to save inventory.");
+            inventories.destroyVanishingCursedItems(player.inventory);
+            InventoryBasic deathChest = inventories.moveInventory(player);
+            logger.info("Kept {} and saved {} of {} item stacks.", SaveInventory.count(inventories.get(player)), SaveInventory.count(deathChest), totalInventoryCount);
+            // TODO: place deathChest
+        }
     }
 
     @SubscribeEvent
-    public void onClone(PlayerEvent.Clone event) {
-        // feature is disabled
-        if (!config.enabled) return;
-        // someone else / something else was cloned
-        if (!(event.isWasDeath() && event.getEntity() instanceof EntityPlayerMP)) return;
-        EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
-        // MC own features trump mine
-        if (player.world.getGameRules().getBoolean("keepInventory") || player.isSpectator()) return;
+    public void onClone(Clone event) {
+        // noone died
+        if (!event.isWasDeath()) return;
+        // should we do something?
+        if (canNotDo(event.getEntity())) return;
+        final EntityPlayer player = event.getEntityPlayer();
+        final InventoryPlayer playerInventory = inventories.get(player);
 
-        logger.info(player.getGameProfile().getName() + " respawned. Attempting to restore inventory.");
-        if (!(inventories.containsKey(player.getGameProfile().getId()))) {
-            logger.error("No saved inventory found for player {}.", player.getGameProfile().getName());
-            return;
+        if (playerInventory.isEmpty()) logger.info(player.getName() + " respawned.");
+        else {
+            logger.info(player.getName() + " respawned. Attempting to restore inventory.");
+            player.inventory.copyInventory(playerInventory);
+            logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
         }
-        int totalInventoryCount = countInventoryPlayer(inventories.get(player.getGameProfile().getId()));
-        player.inventory.copyInventory(inventories.get(player.getGameProfile().getId()));
-        logger.info("Restored {} of {} item stacks.", countInventoryPlayer(player.inventory), totalInventoryCount);
+        inventories.remove(player);
     }
 
-    @Mod.EventHandler
-    public void onStopping(FMLServerStoppingEvent event) {
-        // feature is disabled
-        if (!config.enabled) return;
-        // TODO write inventories to file
+    @SubscribeEvent
+    public void onLoggedOut(PlayerLoggedOutEvent event) {
+        inventories.remove(event.player); // needed, so that the inventory is not available on other (local) game worlds
     }
 
+    /**
+     * The player is being saved to the world store.
+     * This event saves the additional mod related player data to the world store.
+     * <em>WARNING</em>: Do not overwrite the player's .dat file here. You will corrupt the world state.
+     */
+    @SubscribeEvent
+    public void onSave(SaveToFile event) {
+        // should we do something?
+        if (canNotDo(event.getEntity())) return;
+        final EntityPlayer player = event.getEntityPlayer();
+        final InventoryPlayer playerInventory = inventories.get(player);
 
-    //TODO: on login/logout make stuff not available for same player on other gameworlds (p1 dies, logout, change world, login, respawn)
-    //TODO: on login/logout write to file to make stuff available aften game restart (p1 dies, logout, quit game, start game, login, respawn)
-    //TODO: test if temp inventory is restored for other players (p1 dies, p2 dies, p1 respawns, p2 respawns)
-    //TODO: place deathchest
-    //TODO: lock deathchest
-    //TODO: make deathchest indestructable
+        try {
+            if (!playerInventory.isEmpty()) {
+                NBTTagCompound compound = new NBTTagCompound();
+                compound.setTag("Inventory", playerInventory.writeToNBT(new NBTTagList()));
+                compound.setInteger("SelectedItemSlot", playerInventory.currentItem);
+
+                CompressedStreamTools.safeWrite(compound, fileStorage.getPlayerSaveFile(event));
+
+                logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+            }
+        } catch (Exception e) {
+            logger.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
+            logger.catching(e);
+        } finally {
+            inventories.remove(player);
+        }
+    }
+
+//TODO: on login/logout make stuff not available for same player on other gameworlds (p1 dies, logout, change world, login, respawn)
+//TODO: on login/logout write to file to make stuff available aften game restart (p1 dies, logout, quit game, start game, login, respawn)
+//TODO: test if temp inventory is restored for other players (p1 dies, p2 dies, p1 respawns, p2 respawns)
+//TODO: place deathchest
+//TODO: lock deathchest
+//TODO: make deathchest indestructable
 }

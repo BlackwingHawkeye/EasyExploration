@@ -1,13 +1,14 @@
-package com.bwhe.easyExploration.config;
+package com.blackwing.easyExploration.config;
 
 import net.minecraftforge.common.config.Config;
 
-import static com.bwhe.easyExploration.EasyExploration.MODID;
+import static com.blackwing.easyExploration.EasyExploration.MODID;
 
 @Config(modid = MODID, category = "")
 public class EasyExplorationConfig {
 
     public static SubCategorySaveInventory saveInventory = new SubCategorySaveInventory();
+
     public enum InventoryOption {
         @Config.Comment("items stay on your avatar")
         KEEP,
@@ -16,6 +17,7 @@ public class EasyExplorationConfig {
         @Config.Comment("item get dropped at death location")
         DROP
     }
+
     public static class SubCategorySaveInventory {
         @Config.Comment("toggle feature on/off")
         public boolean enabled = true;
@@ -37,6 +39,7 @@ public class EasyExplorationConfig {
     }
 
     public static SubCategoryShowDeathLocation showDeathLocation = new SubCategoryShowDeathLocation();
+
     public enum ShowDeathOption {
         @Config.Comment("Disables the feature. Death location is not shown.")
         NOONE,
@@ -47,6 +50,7 @@ public class EasyExplorationConfig {
         @Config.Comment("Every player receives the death location message.")
         EVERYONE
     }
+
     public static class SubCategoryShowDeathLocation {
         @Config.Comment({"Who should receive the death location message?",
                 "NOONE => Disables the feature. Death location is not shown.",

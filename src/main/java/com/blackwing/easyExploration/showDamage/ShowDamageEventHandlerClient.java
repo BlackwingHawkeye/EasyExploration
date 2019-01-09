@@ -1,8 +1,7 @@
-package com.bwhe.easyExploration.showDamage;
+package com.blackwing.easyExploration.showDamage;
 
-import com.bwhe.easyExploration.EasyExploration;
-import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
-import com.bwhe.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
+import com.blackwing.easyExploration.config.EasyExplorationConfig;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 

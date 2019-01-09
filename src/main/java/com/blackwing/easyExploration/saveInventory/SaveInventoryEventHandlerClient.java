@@ -1,4 +1,4 @@
-package com.bwhe.easyExploration.saveInventory;
+package com.blackwing.easyExploration.saveInventory;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;

@@ -1,4 +1,4 @@
-package com.bwhe.easyExploration;
+package com.blackwing.easyExploration;
 
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
@@ -6,27 +6,32 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.bwhe.easyExploration.EasyExploration.MODID;
+import static com.blackwing.easyExploration.EasyExploration.MODID;
 
 public class EasyExplorationFileStorage {
 
     /**
-     * The singleton
+     * Singleton
      */
-    private static final Map<String, EasyExplorationFileStorage> INSTANCES = new HashMap<>();
+    private static final Map<String, EasyExplorationFileStorage> instances = new HashMap<>();
 
     /**
      * @return the instance
      */
     public static EasyExplorationFileStorage instance(String featureKey) {
-        if (!INSTANCES.containsKey(featureKey)) INSTANCES.put(featureKey, new EasyExplorationFileStorage(featureKey));
-        return INSTANCES.get(featureKey);
+        if (!instances.containsKey(featureKey)) instances.put(featureKey, new EasyExplorationFileStorage(featureKey));
+        return instances.get(featureKey);
     }
 
     private String modChildFolder;
     private String featureChildFolder;
 
-    public EasyExplorationFileStorage(String featureChildFolder) {
+    /**
+     * Constructor
+     *
+     * @param featureChildFolder
+     */
+    private EasyExplorationFileStorage(String featureChildFolder) {
         this.modChildFolder = MODID;
         this.featureChildFolder = featureChildFolder;
     }

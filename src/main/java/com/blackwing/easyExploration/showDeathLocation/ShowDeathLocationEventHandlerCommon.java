@@ -1,7 +1,7 @@
-package com.bwhe.easyExploration.showDeathLocation;
+package com.blackwing.easyExploration.showDeathLocation;
 
-import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
-import com.bwhe.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
+import com.blackwing.easyExploration.config.EasyExplorationConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;

@@ -1,8 +1,8 @@
-package com.bwhe.easyExploration.saveInventory;
+package com.blackwing.easyExploration.saveInventory;
 
-import com.bwhe.easyExploration.EasyExplorationEventHandlerBasic;
-import com.bwhe.easyExploration.EasyExplorationFileStorage;
-import com.bwhe.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
+import com.blackwing.easyExploration.EasyExplorationFileStorage;
+import com.blackwing.easyExploration.config.EasyExplorationConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;

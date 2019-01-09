@@ -1,7 +1,7 @@
-package com.bwhe.easyExploration.saveInventory;
+package com.blackwing.easyExploration.saveInventory;
 
-import com.bwhe.easyExploration.config.EasyExplorationConfig;
-import com.bwhe.easyExploration.config.EasyExplorationConfig.InventoryOption;
+import com.blackwing.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.config.EasyExplorationConfig.InventoryOption;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -18,15 +18,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SaveInventory {
 
     /**
-     * The singleton
+     * Singleton
      */
-    private static final SaveInventory INSTANCE = new SaveInventory();
+    private static final SaveInventory instance = new SaveInventory();
 
     /**
-     * @return the instance
+     * @return instance
      */
     public static SaveInventory instance() {
-        return INSTANCE;
+        return instance;
+    }
+
+    /**
+     * Constructor
+     */
+    private SaveInventory() {
     }
 
     private Logger logger;

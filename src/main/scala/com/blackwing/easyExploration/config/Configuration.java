@@ -2,10 +2,10 @@ package com.blackwing.easyExploration.config;
 
 import net.minecraftforge.common.config.Config;
 
-import static com.blackwing.easyExploration.EasyExploration.MODID;
+import static com.blackwing.easyExploration.Reference.modId;
 
-@Config(modid = MODID, category = "")
-public class EasyExplorationConfig {
+@Config(modid = modId, category = "")
+public class Configuration {
 
     public static SubCategorySaveInventory saveInventory = new SubCategorySaveInventory();
 

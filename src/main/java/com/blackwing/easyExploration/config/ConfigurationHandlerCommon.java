@@ -1,6 +1,6 @@
 package com.blackwing.easyExploration.config;
 
-import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
+import com.blackwing.easyExploration.utilities.EventHandlerBase;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -10,10 +10,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static com.blackwing.easyExploration.EasyExploration.MODID;
 
-public class EasyExplorationConfigEventHandlerCommon extends EasyExplorationEventHandlerBasic {
+public class ConfigurationHandlerCommon extends EventHandlerBase {
 
     @Mod.EventHandler
-    public void init(FMLInitializationEvent event) {
+    public void onInit(FMLInitializationEvent event) {
         ConfigManager.sync(MODID, Config.Type.INSTANCE);
     }
 
@@ -23,5 +23,4 @@ public class EasyExplorationConfigEventHandlerCommon extends EasyExplorationEven
             ConfigManager.sync(MODID, Config.Type.INSTANCE);
         }
     }
-
 }

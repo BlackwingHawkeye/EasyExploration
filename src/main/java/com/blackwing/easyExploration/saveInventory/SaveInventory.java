@@ -1,12 +1,14 @@
 package com.blackwing.easyExploration.saveInventory;
 
-import com.blackwing.easyExploration.config.EasyExplorationConfig;
-import com.blackwing.easyExploration.config.EasyExplorationConfig.InventoryOption;
+import com.blackwing.easyExploration.config.Configuration;
+import com.blackwing.easyExploration.config.Configuration.InventoryOption;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.NonNullList;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +43,7 @@ public class SaveInventory {
         this.logger = logger;
     }
 
-    private EasyExplorationConfig.SubCategorySaveInventory config = EasyExplorationConfig.saveInventory;
+    private Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
     private static Map<UUID, InventoryPlayer> inventories = new HashMap<UUID, InventoryPlayer>();
 
     void put(EntityPlayer player, InventoryPlayer inventory) {
@@ -66,7 +68,7 @@ public class SaveInventory {
         return itemStackCount.get();
     }
 
-    static int count(InventoryBasic inv) {
+    static int count(IInventory inv) {
         if (inv == null) return 0;
         if (inv.getSizeInventory() <= 0) return 0;
         AtomicInteger itemStackCount = new AtomicInteger(0);
@@ -101,22 +103,22 @@ public class SaveInventory {
         source.clear();
     }
 
-    InventoryBasic moveInventory(EntityPlayer player) {
-        InventoryPlayer inventory = new InventoryPlayer(player);
-        InventoryBasic deathChest = new InventoryBasic(player.getName() + "'s loot crate", true, inventory.armorInventory.size() + inventory.offHandInventory.size() + inventory.mainInventory.size());
+    InventoryBasic keepInventory(EntityPlayer player) {
+        InventoryPlayer keepInventory = new InventoryPlayer(player);
+        InventoryBasic storeInventory = new InventoryBasic(player.getName(), true, keepInventory.armorInventory.size() + keepInventory.offHandInventory.size() + keepInventory.mainInventory.size());
         if (config.equipment == InventoryOption.KEEP) {
-            moveStacks(inventory.armorInventory, player.inventory.armorInventory);
-            moveStacks(inventory.offHandInventory, player.inventory.offHandInventory);
+            moveStacks(keepInventory.armorInventory, player.inventory.armorInventory);
+            moveStacks(keepInventory.offHandInventory, player.inventory.offHandInventory);
         }
         if (config.loot == InventoryOption.KEEP) {
-            moveStacks(inventory.mainInventory, player.inventory.mainInventory);
+            moveStacks(keepInventory.mainInventory, player.inventory.mainInventory);
         }
         if (config.equipment == InventoryOption.SAVE) {
-            moveStacks(player.inventory.armorInventory, deathChest);
-            moveStacks(player.inventory.offHandInventory, deathChest);
+            moveStacks(player.inventory.armorInventory, storeInventory);
+            moveStacks(player.inventory.offHandInventory, storeInventory);
         }
         if (config.loot == InventoryOption.SAVE) {
-            moveStacks(player.inventory.mainInventory, deathChest);
+            moveStacks(player.inventory.mainInventory, storeInventory);
         }
         /*
         if (config.equipment == InventoryOption.DROP) {
@@ -126,8 +128,19 @@ public class SaveInventory {
             // happens automatically since we don't cancel the event and don't remove the items from the inventory
         }
         */
-        inventories.put(player.getPersistentID(), inventory);
-        return deathChest;
+        inventories.put(player.getPersistentID(), keepInventory);
+        return storeInventory;
+    }
+
+    void storeInventory(InventoryBasic storeInventory, TileEntityChest storeContainer) {
+        if (storeContainer.getSizeInventory() < storeInventory.getSizeInventory()) {
+            logger.error("death chest can hold only {}/{} item stacks {}",
+                    storeContainer.getSizeInventory(), storeInventory.getSizeInventory(), storeContainer.getClass());
+            return;
+        }
+        for (int i = 0; i < storeInventory.getSizeInventory(); ++i)
+            storeContainer.setInventorySlotContents(i, storeInventory.getStackInSlot(i));
+        storeInventory.clear();
     }
 
     void destroyVanishingCursedItems(InventoryPlayer inventory) {
@@ -139,5 +152,6 @@ public class SaveInventory {
             }
         }
     }
+
 
 }

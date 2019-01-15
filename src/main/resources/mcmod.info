@@ -1,6 +1,6 @@
 [
   {
-    "modid": "EasyExploration",
+    "modid": "easyexploration",
     "name": "Easy Exploration",
     "description": "Makes exploring easier.",
     "version": "${version}",

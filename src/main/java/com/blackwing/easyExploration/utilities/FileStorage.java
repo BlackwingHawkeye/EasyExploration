@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration;
+package com.blackwing.easyExploration.utilities;
 
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
@@ -8,18 +8,18 @@ import java.util.Map;
 
 import static com.blackwing.easyExploration.EasyExploration.MODID;
 
-public class EasyExplorationFileStorage {
+public class FileStorage {
 
     /**
      * Singleton
      */
-    private static final Map<String, EasyExplorationFileStorage> instances = new HashMap<>();
+    private static final Map<String, FileStorage> instances = new HashMap<>();
 
     /**
      * @return the instance
      */
-    public static EasyExplorationFileStorage instance(String featureKey) {
-        if (!instances.containsKey(featureKey)) instances.put(featureKey, new EasyExplorationFileStorage(featureKey));
+    public static FileStorage instance(String featureKey) {
+        if (!instances.containsKey(featureKey)) instances.put(featureKey, new FileStorage(featureKey));
         return instances.get(featureKey);
     }
 
@@ -31,7 +31,7 @@ public class EasyExplorationFileStorage {
      *
      * @param featureChildFolder
      */
-    private EasyExplorationFileStorage(String featureChildFolder) {
+    private FileStorage(String featureChildFolder) {
         this.modChildFolder = MODID;
         this.featureChildFolder = featureChildFolder;
     }
@@ -48,9 +48,7 @@ public class EasyExplorationFileStorage {
 
         final File saveDir = new File(parentDir, childDir);
 
-        if (!saveDir.exists()) {
-            saveDir.mkdirs();
-        }
+        if (!saveDir.exists()) saveDir.mkdirs();
 
         return saveDir;
     }

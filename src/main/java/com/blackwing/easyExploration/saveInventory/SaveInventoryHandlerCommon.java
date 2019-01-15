@@ -1,32 +1,42 @@
 package com.blackwing.easyExploration.saveInventory;
 
-import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
-import com.blackwing.easyExploration.EasyExplorationFileStorage;
-import com.blackwing.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.blocks.Blocks;
+import com.blackwing.easyExploration.config.Configuration;
+import com.blackwing.easyExploration.utilities.EventHandlerBase;
+import com.blackwing.easyExploration.utilities.FileStorage;
+import net.minecraft.block.BlockChest;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ILockableContainer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.Clone;
 import net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile;
 import net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 
 import java.io.File;
 import java.io.IOException;
 
-public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandlerBasic {
+public class SaveInventoryHandlerCommon extends EventHandlerBase {
 
-    private static final EasyExplorationConfig.SubCategorySaveInventory config = EasyExplorationConfig.saveInventory;
+    private static final Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
     private static final SaveInventory saveInventory = SaveInventory.instance();
-    private static final EasyExplorationFileStorage fileStorage = EasyExplorationFileStorage.instance("saveinventory");
+    private static final FileStorage fileStorage = FileStorage.instance("saveinventory");
 
     private boolean canNotDo(Entity entity) {
         // feature is disabled
@@ -39,6 +49,28 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         if (((EntityPlayer) entity).isSpectator()) return true;
         // all right, let's do that
         return false;
+    }
+
+    private BlockPos placeDeathChest(EntityPlayer player) {
+        ItemStack deathStack = new ItemStack(Blocks.DeathChest);
+        BlockPos pos = new BlockPos(player.posX, player.posY, player.posZ);
+        float hitX = (float) pos.getX();
+        float hitY = (float) pos.getY();
+        float hitZ = (float) pos.getZ();
+        if (!player.world.getWorldBorder().contains(pos)) {
+            logger.error("Death chest position out of world borders. Block:{} World{}", pos, player.world.getWorldBorder());
+            return pos;
+        }
+        IBlockState iblockstate1 = Blocks.DeathChest.getStateForPlacement(
+                player.world, pos, player.getHorizontalFacing(), hitX, hitY, hitZ, 0, player, EnumHand.MAIN_HAND);
+
+        if (new ItemBlock(Blocks.DeathChest).placeBlockAt(deathStack, player, player.world, pos, player.getHorizontalFacing(), hitX, hitY, hitZ, iblockstate1)) {
+            iblockstate1 = player.world.getBlockState(pos);
+            SoundType soundtype = iblockstate1.getBlock().getSoundType(iblockstate1, player.world, pos, player);
+            player.world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+            deathStack.shrink(1);
+        }
+        return pos;
     }
 
     /**
@@ -97,9 +129,14 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
 
         logger.info(player.getName() + " died. Attempting to save inventory.");
         saveInventory.destroyVanishingCursedItems(player.inventory);
-        InventoryBasic deathChest = saveInventory.moveInventory(player);
-        logger.info("Kept {} and saved {} of {} item stacks.", SaveInventory.count(saveInventory.get(player)), SaveInventory.count(deathChest), totalInventoryCount);
-        // TODO: place deathChest
+        InventoryBasic storeInventory = saveInventory.keepInventory(player);
+
+        BlockPos pos = placeDeathChest(player);
+        ILockableContainer storeContainer = ((BlockChest) Blocks.DeathChest).getLockableContainer(player.world, pos);
+        if (storeContainer instanceof TileEntityChest)
+            saveInventory.storeInventory(storeInventory, (TileEntityChest) storeContainer);
+
+        logger.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(saveInventory.get(player)), SaveInventory.count(storeContainer), totalInventoryCount);
     }
 
     @SubscribeEvent
@@ -116,12 +153,6 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
 
         saveInventory.remove(player);
-    }
-
-    @SubscribeEvent
-    public void onLoggedOut(PlayerLoggedOutEvent event) {
-        logger.info("Player {} logged out. Removing inventory store from memory.", event.player.getName());
-        saveInventory.remove(event.player); // needed, so that the inventory is not available on other (local) game worlds
     }
 
     /**
@@ -150,8 +181,9 @@ public class SaveInventoryEventHandlerCommon extends EasyExplorationEventHandler
         }
     }
 
-//TODO: test if temp inventory is restored for other players (p1 dies, p2 dies, p1 respawns, p2 respawns)
-//TODO: place deathchest
-//TODO: lock deathchest
-//TODO: make deathchest indestructable
+    //TODO: test if temp inventory is restored for other players (p1 dies, p2 dies, p1 respawns, p2 respawns)
+    //TODO: place deathchest
+    //TODO: lock deathchest
+    //TODO: make deathchest indestructable
+    // TODO: store xp
 }

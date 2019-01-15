@@ -1,14 +1,14 @@
 package com.blackwing.easyExploration.showDeathLocation;
 
-import com.blackwing.easyExploration.EasyExplorationEventHandlerBasic;
-import com.blackwing.easyExploration.config.EasyExplorationConfig;
+import com.blackwing.easyExploration.config.Configuration;
+import com.blackwing.easyExploration.utilities.EventHandlerBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ShowDeathLocationEventHandlerCommon extends EasyExplorationEventHandlerBasic {
+public class ShowDeathLocationHandlerCommon extends EventHandlerBase {
 
     private TextComponentString getMessage(EntityPlayerMP player) {
         return new TextComponentString(player.getName() + " died in "
@@ -23,7 +23,7 @@ public class ShowDeathLocationEventHandlerCommon extends EasyExplorationEventHan
         if (!(event.getEntity() instanceof EntityPlayerMP)) return;
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();
 
-        switch (EasyExplorationConfig.showDeathLocation.sendTo) {
+        switch (Configuration.showDeathLocation.sendTo) {
             case NOONE:
                 break;
             case PLAYER:

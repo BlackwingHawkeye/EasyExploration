@@ -5,7 +5,7 @@ import com.blackwing.easyExploration.saveInventory.SaveInventory;
 import com.blackwing.easyExploration.saveInventory.SaveInventoryHandlerCommon;
 import com.blackwing.easyExploration.showDamage.ShowDamageHandlerCommon;
 import com.blackwing.easyExploration.showDeathLocation.ShowDeathLocationHandlerCommon;
-import com.blackwing.easyExploration.utilities.EventHandlerBase;
+import com.blackwing.easyExploration.util.EventHandlerBase;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

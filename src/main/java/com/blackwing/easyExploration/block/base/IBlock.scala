@@ -1,7 +1,7 @@
-package com.blackwing.easyExploration.blocks.base
+package com.blackwing.easyExploration.block.base
 
 import com.blackwing.easyExploration.EasyExploration
-import com.blackwing.easyExploration.utilities.IHasModel
+import com.blackwing.easyExploration.util.IHasModel
 import net.minecraft.block.Block
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.{Item, ItemBlock}

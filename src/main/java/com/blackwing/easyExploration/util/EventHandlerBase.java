@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration.utilities;
+package com.blackwing.easyExploration.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;

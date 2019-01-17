@@ -1,7 +1,7 @@
 package com.blackwing.easyExploration.items.base;
 
 import com.blackwing.easyExploration.EasyExploration;
-import com.blackwing.easyExploration.utilities.IHasModel;
+import com.blackwing.easyExploration.util.IHasModel;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 

@@ -1,8 +1,8 @@
 package com.blackwing.easyExploration;
 
 import com.blackwing.easyExploration.proxy.Common;
-import com.blackwing.easyExploration.utilities.EventHandlerBase;
-import com.blackwing.easyExploration.utilities.IHasModel;
+import com.blackwing.easyExploration.util.EventHandlerBase;
+import com.blackwing.easyExploration.util.IHasModel;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;

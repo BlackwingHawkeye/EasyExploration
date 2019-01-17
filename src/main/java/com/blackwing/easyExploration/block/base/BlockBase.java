@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration.blocks.base;
+package com.blackwing.easyExploration.block.base;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

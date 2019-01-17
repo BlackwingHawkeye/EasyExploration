@@ -1,6 +1,6 @@
 package com.blackwing.easyExploration.showDamage;
 
-import com.blackwing.easyExploration.utilities.EventHandlerBase;
+import com.blackwing.easyExploration.util.EventHandlerBase;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 

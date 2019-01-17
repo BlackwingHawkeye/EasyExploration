@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration.utilities;
+package com.blackwing.easyExploration.util;
 
 public interface IHasModel {
     public void registerModels();

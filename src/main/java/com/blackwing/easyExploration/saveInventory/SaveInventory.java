@@ -2,13 +2,12 @@ package com.blackwing.easyExploration.saveInventory;
 
 import com.blackwing.easyExploration.config.Configuration;
 import com.blackwing.easyExploration.config.Configuration.InventoryOption;
+import com.blackwing.easyExploration.inventory.InventoryPlayerEE;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.NonNullList;
 import org.apache.logging.log4j.Logger;
 
@@ -37,24 +36,24 @@ public class SaveInventory {
     private SaveInventory() {
     }
 
-    private Logger logger;
+    private static Logger logger;
 
     public void setLogger(Logger logger) {
-        this.logger = logger;
+        SaveInventory.logger = logger;
     }
 
-    private Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
-    private static Map<UUID, InventoryPlayer> inventories = new HashMap<UUID, InventoryPlayer>();
+    private static Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
+    private static Map<UUID, InventoryPlayerEE> inventories = new HashMap<UUID, InventoryPlayerEE>();
 
-    void put(EntityPlayer player, InventoryPlayer inventory) {
+    public static void put(EntityPlayer player, InventoryPlayerEE inventory) {
         inventories.put(player.getPersistentID(), inventory);
     }
 
-    InventoryPlayer get(EntityPlayer player) {
-        return inventories.getOrDefault(player.getPersistentID(), new InventoryPlayer(player));
+    public static InventoryPlayerEE get(EntityPlayer player) {
+        return inventories.getOrDefault(player.getPersistentID(), new InventoryPlayerEE(player));
     }
 
-    void remove(EntityPlayer player) {
+    public static void remove(EntityPlayer player) {
         inventories.remove(player.getPersistentID());
     }
 
@@ -77,7 +76,7 @@ public class SaveInventory {
         return itemStackCount.get();
     }
 
-    private void moveStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
+    private static void moveStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
         if (target == null) {
             logger.error("Target inventory missing.");
             return;
@@ -94,32 +93,24 @@ public class SaveInventory {
         source.clear();
     }
 
-    private void moveStacks(NonNullList<ItemStack> source, InventoryBasic target) {
-        if (source == null) {
-            logger.warn("source inventory missing.");
-            return;
-        }
-        for (ItemStack stack : source) target.addItem(stack);
-        source.clear();
-    }
+    static InventoryPlayerEE keepInventory(EntityPlayer player) {
+        InventoryPlayerEE inventory = new InventoryPlayerEE(player);
 
-    InventoryBasic keepInventory(EntityPlayer player) {
-        InventoryPlayer keepInventory = new InventoryPlayer(player);
-        InventoryBasic storeInventory = new InventoryBasic(player.getName(), true, keepInventory.armorInventory.size() + keepInventory.offHandInventory.size() + keepInventory.mainInventory.size());
         if (config.equipment == InventoryOption.KEEP) {
-            moveStacks(keepInventory.armorInventory, player.inventory.armorInventory);
-            moveStacks(keepInventory.offHandInventory, player.inventory.offHandInventory);
+            moveStacks(inventory.armorInventory, player.inventory.armorInventory);
+            moveStacks(inventory.offHandInventory, player.inventory.offHandInventory);
         }
         if (config.loot == InventoryOption.KEEP) {
-            moveStacks(keepInventory.mainInventory, player.inventory.mainInventory);
+            moveStacks(inventory.mainInventory, player.inventory.mainInventory);
         }
         if (config.equipment == InventoryOption.SAVE) {
-            moveStacks(player.inventory.armorInventory, storeInventory);
-            moveStacks(player.inventory.offHandInventory, storeInventory);
+            inventory.inventoryDeathChest.moveStacks(player.inventory.armorInventory);
+            inventory.inventoryDeathChest.moveStacks(player.inventory.offHandInventory);
         }
         if (config.loot == InventoryOption.SAVE) {
-            moveStacks(player.inventory.mainInventory, storeInventory);
+            inventory.inventoryDeathChest.moveStacks(player.inventory.mainInventory);
         }
+
         /*
         if (config.equipment == InventoryOption.DROP) {
             // happens automatically since we don't cancel the event and don't remove the items from the inventory
@@ -128,22 +119,11 @@ public class SaveInventory {
             // happens automatically since we don't cancel the event and don't remove the items from the inventory
         }
         */
-        inventories.put(player.getPersistentID(), keepInventory);
-        return storeInventory;
+        inventories.put(player.getPersistentID(), inventory);
+        return inventory;
     }
 
-    void storeInventory(InventoryBasic storeInventory, TileEntityChest storeContainer) {
-        if (storeContainer.getSizeInventory() < storeInventory.getSizeInventory()) {
-            logger.error("death chest can hold only {}/{} item stacks {}",
-                    storeContainer.getSizeInventory(), storeInventory.getSizeInventory(), storeContainer.getClass());
-            return;
-        }
-        for (int i = 0; i < storeInventory.getSizeInventory(); ++i)
-            storeContainer.setInventorySlotContents(i, storeInventory.getStackInSlot(i));
-        storeInventory.clear();
-    }
-
-    void destroyVanishingCursedItems(InventoryPlayer inventory) {
+    static void destroyVanishingCursedItems(InventoryPlayer inventory) {
         for (int i = 0; i < inventory.getSizeInventory(); ++i) {
             ItemStack itemstack = inventory.getStackInSlot(i);
 

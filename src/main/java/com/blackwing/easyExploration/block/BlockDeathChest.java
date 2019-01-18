@@ -1,5 +1,6 @@
 package com.blackwing.easyExploration.block;
 
+import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.block.base.ChestBase;
 import com.blackwing.easyExploration.tileEntity.TileEntityDeathChest;
 import net.minecraft.block.BlockChest;
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BlockDeathChest extends ChestBase {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(EasyExploration.MODID);
 
     public BlockDeathChest() {
         super("death_chest", BlockChest.Type.BASIC);
@@ -65,14 +66,14 @@ public class BlockDeathChest extends ChestBase {
         if (world.isRemote) return true;
         LOGGER.info("It's on the server!");
 
-        player.displayGUIChest(getInventory(world,pos));
+        player.displayGUIChest(getInventory(world, pos));
 
         return true;
     }
 
     @Nullable
-    public ILockableContainer getLockableContainer(@NotNull World world, @NotNull BlockPos pos){
-        return getContainer(world,pos,true);
+    public ILockableContainer getLockableContainer(@NotNull World world, @NotNull BlockPos pos) {
+        return getContainer(world, pos, true);
     }
 
     @Nullable
@@ -85,7 +86,7 @@ public class BlockDeathChest extends ChestBase {
     }
 
     @Nullable
-    public IInventory getInventory(@NotNull World world, @NotNull BlockPos pos){
+    public IInventory getInventory(@NotNull World world, @NotNull BlockPos pos) {
         TileEntity tileEntity = world.getTileEntity(pos);
 
         if (!(tileEntity instanceof TileEntityDeathChest)) return null;

@@ -1,7 +1,6 @@
 package com.blackwing.easyExploration.proxy;
 
 import com.blackwing.easyExploration.config.ConfigurationHandlerCommon;
-import com.blackwing.easyExploration.saveInventory.SaveInventory;
 import com.blackwing.easyExploration.saveInventory.SaveInventoryHandlerCommon;
 import com.blackwing.easyExploration.showDamage.ShowDamageHandlerCommon;
 import com.blackwing.easyExploration.showDeathLocation.ShowDeathLocationHandlerCommon;
@@ -44,7 +43,6 @@ public class Common extends EventHandlerBase {
     public void onInit(FMLInitializationEvent event) {
         super.onInit(event);
         for (EventHandlerBase handler : handlers) handler.onInit(event);
-        SaveInventory.instance().setLogger(logger);
     }
 
     /*
@@ -56,5 +54,6 @@ public class Common extends EventHandlerBase {
         for (EventHandlerBase handler : handlers) handler.onPostInit(event);
     }
 
-    public void registerItemRenderer(Item item, int meta, String id) {}
+    public void registerItemRenderer(Item item, int meta, String id) {
+    }
 }

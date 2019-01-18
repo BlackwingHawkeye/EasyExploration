@@ -1,4 +1,4 @@
 package com.blackwing.easyExploration.items.base;
 
-public class ArmorBAse {
+public class ArmorBase {
 }

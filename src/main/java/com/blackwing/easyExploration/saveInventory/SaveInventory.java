@@ -1,5 +1,6 @@
 package com.blackwing.easyExploration.saveInventory;
 
+import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.config.Configuration;
 import com.blackwing.easyExploration.config.Configuration.InventoryOption;
 import com.blackwing.easyExploration.inventory.InventoryPlayerEE;
@@ -9,7 +10,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,12 +34,6 @@ public class SaveInventory {
      * Constructor
      */
     private SaveInventory() {
-    }
-
-    private static Logger logger;
-
-    public void setLogger(Logger logger) {
-        SaveInventory.logger = logger;
     }
 
     private static Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
@@ -78,15 +72,15 @@ public class SaveInventory {
 
     private static void moveStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
         if (target == null) {
-            logger.error("Target inventory missing.");
+            EasyExploration.logger.error("Target inventory missing.");
             return;
         }
         if (source == null) {
-            logger.error("Source inventory missing.");
+            EasyExploration.logger.error("Source inventory missing.");
             return;
         }
         if (target.size() != source.size()) {
-            logger.error("Target inventory has wrong size.");
+            EasyExploration.logger.error("Target inventory has wrong size.");
             return;
         }
         for (int i = 0; i < target.size(); ++i) target.set(i, source.get(i));

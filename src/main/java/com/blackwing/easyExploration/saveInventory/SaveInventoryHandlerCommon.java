@@ -1,5 +1,6 @@
 package com.blackwing.easyExploration.saveInventory;
 
+import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.config.Configuration;
 import com.blackwing.easyExploration.init.Blocks;
 import com.blackwing.easyExploration.inventory.InventoryPlayerEE;
@@ -9,7 +10,6 @@ import com.blackwing.easyExploration.util.FileStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -57,7 +57,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         try {
             final File playerFile = fileStorage.getPlayerSaveFile(event);
             // this is legit if the player is new in this game world
-            if (!playerFile.exists()) logger.warn("Player file not found. " + playerFile.getPath());
+            if (!playerFile.exists()) EasyExploration.logger.warn("Player file not found. " + playerFile.getPath());
             else {
                 final NBTTagCompound compound = CompressedStreamTools.read(playerFile);
                 if (compound == null) throw new IOException("Can't read from file " + playerFile.getPath());
@@ -65,11 +65,11 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
                 playerInventory.readFromNBT(compound.getTagList("Inventory", 10));
                 playerInventory.currentItem = compound.getInteger("SelectedItemSlot");
 
-                logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+                EasyExploration.logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
             }
         } catch (final Exception e) {
-            logger.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
-            logger.catching(e);
+            EasyExploration.logger.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
+            EasyExploration.logger.catching(e);
         } finally {
             SaveInventory.put(player, playerInventory);
         }
@@ -85,7 +85,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         if (canNotDo(event.player)) return;
         EntityPlayerMP player = (EntityPlayerMP) event.player;
 
-        logger.info("Player {} logged in. Sending sync package to player client.", player.getName());
+        EasyExploration.logger.info("Player {} logged in. Sending sync package to player client.", player.getName());
         // Send Client a package containing the inventory to be synced
         player.sendContainerToPlayer(player.inventoryContainer);
     }
@@ -97,7 +97,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         final EntityPlayer player = (EntityPlayer) event.getEntity();
         final int totalInventoryCount = SaveInventory.count(player.inventory);
 
-        logger.info(player.getName() + " died. Attempting to save inventory.");
+        EasyExploration.logger.info(player.getName() + " died. Attempting to save inventory.");
         SaveInventory.destroyVanishingCursedItems(player.inventory);
         InventoryPlayerEE inventory = SaveInventory.keepInventory(player);
 
@@ -111,7 +111,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
             tileEntityDeathChest.setInventory(inventory.inventoryDeathChest);
         }
 
-        logger.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(inventory), inventory.inventoryDeathChest.stackCount, totalInventoryCount);
+        EasyExploration.logger.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(inventory), inventory.inventoryDeathChest.stackCount, totalInventoryCount);
     }
 
     @SubscribeEvent
@@ -121,11 +121,11 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
-        final InventoryPlayer playerInventory = SaveInventory.get(player);
+        final InventoryPlayerEE playerInventory = SaveInventory.get(player);
 
-        logger.info(player.getName() + " respawned. Attempting to restore inventory.");
+        EasyExploration.logger.info(player.getName() + " respawned. Attempting to restore inventory.");
         player.inventory.copyInventory(playerInventory);
-        logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
+        EasyExploration.logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
 
         SaveInventory.remove(player);
     }
@@ -140,7 +140,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
-        final InventoryPlayer playerInventory = SaveInventory.get(player);
+        final InventoryPlayerEE playerInventory = SaveInventory.get(player);
 
         try {
             NBTTagCompound compound = new NBTTagCompound();
@@ -149,10 +149,10 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
 
             CompressedStreamTools.safeWrite(compound, fileStorage.getPlayerSaveFile(event));
 
-            logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+            EasyExploration.logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
         } catch (Exception e) {
-            logger.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
-            logger.catching(e);
+            EasyExploration.logger.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
+            EasyExploration.logger.catching(e);
         }
     }
 

@@ -21,16 +21,12 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class TileEntityDeathChest extends TileEntity implements ITickable, IInteractionObject {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     private InventoryDeathChest inventory;
     private UUID ownerUUID;
@@ -114,14 +110,8 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
         super.readFromNBT(compound);
 
         inventory.loadInventoryFromNBT(compound.getTagList("Inventory", 10));
-
-        if (compound.hasKey("OwnerUUID", 8)) {
-            ownerUUID = compound.getUniqueId("OwnerUUID");
-        }
-
-        if (compound.hasKey("OwnerName", 8)) {
-            ownerName = compound.getString("OwnerName");
-        }
+        if (compound.hasKey("OwnerUUID", 8)) ownerUUID = compound.getUniqueId("OwnerUUID");
+        if (compound.hasKey("OwnerName", 8)) ownerName = compound.getString("OwnerName");
     }
 
     /**

@@ -55,9 +55,8 @@ public class InventoryDeathChest extends InventoryBasic {
     }
 
     public void loadInventoryFromNBT(NBTTagList tagList) {
-        for (int i = 0; i < getSizeInventory(); ++i) {
-            setInventorySlotContents(i, ItemStack.EMPTY);
-        }
+        clear();
+        //for (int i = 0; i < getSizeInventory(); ++i)             setInventorySlotContents(i, ItemStack.EMPTY);
 
         for (int k = 0; k < tagList.tagCount(); ++k) {
             NBTTagCompound nbttagcompound = tagList.getCompoundTagAt(k);
@@ -86,20 +85,13 @@ public class InventoryDeathChest extends InventoryBasic {
         return nbttaglist;
     }
 
-    /**
-     * Don't rename this method to canInteractWith due to conflicts with Container
-     */
-    public boolean isUsableByPlayer(EntityPlayer player) {
-        return tileEntityDeathChest.canBeUsed(player) && super.isUsableByPlayer(player);
-    }
-
     public void openInventory(EntityPlayer player) {
-        tileEntityDeathChest.openChest();
+        tileEntityDeathChest.openInventory(player);
         super.openInventory(player);
     }
 
     public void closeInventory(EntityPlayer player) {
-        tileEntityDeathChest.closeChest();
+        tileEntityDeathChest.closeInventory(player);
         super.closeInventory(player);
     }
 }

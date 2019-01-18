@@ -13,6 +13,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.Clone;
@@ -27,7 +28,7 @@ import java.io.IOException;
 public class SaveInventoryHandlerCommon extends EventHandlerBase {
 
     private static final Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
-    private static final FileStorage fileStorage = FileStorage.instance("saveinventory");
+    private static final FileStorage fileStorage = FileStorage.instance(FileStorage.FEATURE_KEY_SAVEINVENTORY);
 
     private boolean canNotDo(Entity entity) {
         // feature is disabled
@@ -102,8 +103,12 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
 
         if (inventory.inventoryDeathChest.itemCount > 0) {
             BlockPos pos = Blocks.DEATH_CHEST.placeDeathChest(player);
-            TileEntityDeathChest deathChest = Blocks.DEATH_CHEST.getContainer(player.world, pos, true);
-            if (deathChest != null) deathChest.chestInventory = inventory.inventoryDeathChest;
+
+            TileEntity tileEntity = player.world.getTileEntity(pos);
+            if (!(tileEntity instanceof TileEntityDeathChest)) return;
+            TileEntityDeathChest tileEntityDeathChest = (TileEntityDeathChest) tileEntity;
+            tileEntityDeathChest.setOwner(player);
+            tileEntityDeathChest.setInventory(inventory.inventoryDeathChest);
         }
 
         logger.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(inventory), inventory.inventoryDeathChest.stackCount, totalInventoryCount);

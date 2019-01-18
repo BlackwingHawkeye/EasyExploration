@@ -10,6 +10,8 @@ import static com.blackwing.easyExploration.EasyExploration.MODID;
 
 public class FileStorage {
 
+    public static final String FEATURE_KEY_SAVEINVENTORY = "saveinventory";
+
     /**
      * Singleton
      */

@@ -5,7 +5,9 @@ import com.blackwing.easyExploration.saveInventory.SaveInventoryHandlerCommon;
 import com.blackwing.easyExploration.showDamage.ShowDamageHandlerCommon;
 import com.blackwing.easyExploration.showDeathLocation.ShowDeathLocationHandlerCommon;
 import com.blackwing.easyExploration.util.EventHandlerBase;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -55,5 +57,8 @@ public class Common extends EventHandlerBase {
     }
 
     public void registerItemRenderer(Item item, int meta, String id) {
+    }
+
+    public <T extends TileEntity> void registerTileEntityAndRenderer(Class<T> tileEntityClass, String id, TileEntitySpecialRenderer<? super T> specialRenderer) {
     }
 }

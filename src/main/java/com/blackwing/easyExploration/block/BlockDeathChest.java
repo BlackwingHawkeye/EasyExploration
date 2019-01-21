@@ -29,14 +29,25 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BlockDeathChest extends ChestBase {
 
-    private static final Logger LOGGER = LogManager.getLogger(EasyExploration.MODID);
+    private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
+
+    @Override
+    public String getId() {
+        return "deathchest";
+    }
+
+    @Override
+    public String getName() {
+        return "deathchest";
+    }
 
     public BlockDeathChest() {
-        super("death_chest", BlockChest.Type.BASIC);
+        super(BlockChest.Type.BASIC);
         setLightLevel(8);
         setBlockUnbreakable();
         setResistance(10);
         setSoundType(SoundType.WOOD);
+        log.info("BlockDeathChest created");
     }
 
     /**
@@ -56,15 +67,15 @@ public class BlockDeathChest extends ChestBase {
         // get the tile entity
         TileEntity tileEntity = world.getTileEntity(pos);
         if (!(tileEntity instanceof TileEntityDeathChest)) return true;
-        LOGGER.info("It's a death chest!");
+        log.info("It's a death chest!");
         TileEntityDeathChest tileEntityDeathChest = (TileEntityDeathChest) tileEntity;
 
         if (!tileEntityDeathChest.isUsableByPlayer(player)) return true;
-        LOGGER.info("It's usable!");
+        log.info("It's usable!");
         if (world.getBlockState(pos.up()).doesSideBlockChestOpening(world, pos.up(), EnumFacing.DOWN)) return true;
-        LOGGER.info("It's facing right!");
+        log.info("It's facing right!");
         if (world.isRemote) return true;
-        LOGGER.info("It's on the server!");
+        log.info("It's on the server!");
 
         player.displayGUIChest(getInventory(world, pos));
 
@@ -78,18 +89,22 @@ public class BlockDeathChest extends ChestBase {
 
     @Nullable
     public ILockableContainer getContainer(World world, @NotNull BlockPos pos, boolean allowBlocking) {
-        TileEntity tileEntity = world.getTileEntity(pos);
-
-        if (!(tileEntity instanceof TileEntityDeathChest)) return null;
-
-        return (ILockableContainer) ((TileEntityDeathChest) tileEntity).getInventory();
+        return (ILockableContainer) getInventory(world, pos);
     }
 
     @Nullable
     public IInventory getInventory(@NotNull World world, @NotNull BlockPos pos) {
         TileEntity tileEntity = world.getTileEntity(pos);
 
-        if (!(tileEntity instanceof TileEntityDeathChest)) return null;
+        if (tileEntity == null) {
+            log.error("TileEnitiy is null.");
+            return null;
+        }
+
+        if (!(tileEntity instanceof TileEntityDeathChest)) {
+            log.error("TileEnitiy is not a death chest. " + tileEntity.getClass());
+            return null;
+        }
 
         return ((TileEntityDeathChest) tileEntity).getInventory();
     }
@@ -117,6 +132,7 @@ public class BlockDeathChest extends ChestBase {
             SoundType soundtype = blockState.get().getBlock().getSoundType(blockState.get(), player.world, pos, player);
             player.world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
             deathStack.shrink(1);
+            log.info("death chest placed");
         }
         return pos;
     }

@@ -35,3 +35,19 @@ easyexploration.config.sleepingBags.tooltip="Configure your travel beds."
 
 easyexploration.config.showDamage.name="Show damage"
 easyexploration.config.showDamage.tooltip="Configure damage information."
+
+#Items
+#item.ruby.name=Ruby
+
+#Blocks
+tile.deathchest.name=Death Chest of %s
+
+#Tools
+#item.ruby_sword.name=Ruby Sword
+
+#Armor
+#item.ruby_helmet.name=Ruby Helmet
+
+#Food
+#item.evil_apple.name=Evil Apple
+

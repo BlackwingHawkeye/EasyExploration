@@ -1,12 +1,13 @@
 package com.blackwing.easyExploration.tileEntity;
 
+import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.init.SoundEvents;
+import com.blackwing.easyExploration.inventory.ContainerDeathChest;
 import com.blackwing.easyExploration.inventory.InventoryDeathChest;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -21,6 +22,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -28,26 +31,33 @@ import java.util.UUID;
 
 public class TileEntityDeathChest extends TileEntity implements ITickable, IInteractionObject {
 
+    private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
+
     private InventoryDeathChest inventory;
     private UUID ownerUUID;
     private String ownerName;
-    private IItemHandler itemHandler;
+    public IItemHandler itemHandler;
     /**
      * The current angle of the lid (between 0 and 1)
      */
-    private float lidAngle = 0.0F;
+    public float lidAngle = 0.0F;
+    /**
+     * The angle of the lid last tick
+     */
+    public float prevLidAngle;
     /**
      * The number of players currently using this chest
      */
-    private boolean isInUse = false;
+    public boolean isInUse = false;
     /**
      * Server sync counter (once per 20 ticks)
      */
-    private int ticksSinceSync;
+    public int ticksSinceSync;
 
     public void setInventory(InventoryDeathChest inventory) {
         this.inventory.moveStacks(inventory);
         this.inventory.setTileEntityDeathChest(this);
+        log.info("moved items");
     }
 
     public InventoryDeathChest getInventory() {
@@ -57,6 +67,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
     public void setOwner(EntityPlayer player) {
         ownerUUID = player.getUniqueID();
         ownerName = player.getName();
+        log.info("set owner");
     }
 
     /**
@@ -108,6 +119,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
      */
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
+        log.info("loading from file");
 
         inventory.loadInventoryFromNBT(compound.getTagList("Inventory", 10));
         if (compound.hasKey("OwnerUUID", 8)) ownerUUID = compound.getUniqueId("OwnerUUID");
@@ -120,6 +132,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
     @NotNull
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
+        log.info("saving to file");
 
         compound.setTag("Inventory", inventory.saveInventoryToNBT());
         compound.setUniqueId("OwnerUUID", ownerUUID);
@@ -142,8 +155,8 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
 
             // for every player in reach of the chest, check if he/she has this container open
             for (EntityPlayer entityplayer : world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB((double) ((float) i - 5.0F), (double) ((float) j - 5.0F), (double) ((float) k - 5.0F), (double) ((float) (i + 1) + 5.0F), (double) ((float) (j + 1) + 5.0F), (double) ((float) (k + 1) + 5.0F)))) {
-                if (entityplayer.openContainer instanceof ContainerChest) {
-                    IInventory iinventory = ((ContainerChest) entityplayer.openContainer).getLowerChestInventory();
+                if (entityplayer.openContainer instanceof ContainerDeathChest) {
+                    IInventory iinventory = ((ContainerDeathChest) entityplayer.openContainer).getChestInventory();
 
                     isInUse = (iinventory == inventory);
                     break;
@@ -188,6 +201,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
      * invalidates a tile entity
      */
     public void invalidate() {
+        log.info("invalidating tile entity");
         updateContainingBlockInfo();
         super.invalidate();
     }
@@ -196,6 +210,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
      * do stuff when opening the inventory
      */
     public void openInventory(@NotNull EntityPlayer player) {
+        log.info("inventory is opening");
         if (player.isSpectator()) return;
 
         isInUse = true;
@@ -207,6 +222,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
      * do stuff when closing the inventory
      */
     public void closeInventory(@NotNull EntityPlayer player) {
+        log.info("inventory is closing");
         if (player.isSpectator() || !(getBlockType() instanceof BlockChest)) return;
 
         isInUse = false;
@@ -221,13 +237,15 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
 
     @NotNull
     public Container createContainer(@NotNull InventoryPlayer playerInventory, @NotNull EntityPlayer playerIn) {
-        return new ContainerChest(playerInventory, inventory, playerIn);
+        log.info("creating container");
+        return new ContainerDeathChest(playerInventory, inventory, playerIn);
     }
 
     /**
      * Don't rename this method to canInteractWith due to conflicts with Container
      */
     public boolean isUsableByPlayer(EntityPlayer player) {
+        log.info("checking tile entity usability");
         // double check if the block at this position is block
         if (world.getTileEntity(pos) != this) return false;
         // check if the player is too far away

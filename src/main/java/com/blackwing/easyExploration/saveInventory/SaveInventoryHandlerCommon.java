@@ -21,11 +21,15 @@ import net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile;
 import net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 
 public class SaveInventoryHandlerCommon extends EventHandlerBase {
+
+    private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
 
     private static final Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
     private static final FileStorage fileStorage = FileStorage.instance(FileStorage.FEATURE_KEY_SAVEINVENTORY);
@@ -105,7 +109,22 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
             BlockPos pos = Blocks.DEATH_CHEST.placeDeathChest(player);
 
             TileEntity tileEntity = player.world.getTileEntity(pos);
-            if (!(tileEntity instanceof TileEntityDeathChest)) return;
+            if (tileEntity == null) {
+                log.error("tile entity at block death chest position is null. ");
+                return;
+            }
+            if (!(tileEntity instanceof TileEntityDeathChest)) {
+                log.error("tile entity at block death chest position is not a death chest: " + tileEntity.getClass());
+                return;
+            }
+            /*
+            [11:15:03] [Server thread/INFO] [easyexploration]: Player905 died. Attempting to save inventory.
+[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.inventory.InventoryDeathChest]: created death chest inventory
+[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.block.BlockDeathChest]: BlockDeathChest created
+[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.block.BlockDeathChest]: death chest placed
+[11:15:03] [Server thread/ERROR] [easyexploration.class com.blackwing.easyExploration.saveInventory.SaveInventoryHandlerCommon]: tile entity at block death chest position is not a death chest: class net.minecraft.tileentity.TileEntityChest
+
+             */
             TileEntityDeathChest tileEntityDeathChest = (TileEntityDeathChest) tileEntity;
             tileEntityDeathChest.setOwner(player);
             tileEntityDeathChest.setInventory(inventory.inventoryDeathChest);

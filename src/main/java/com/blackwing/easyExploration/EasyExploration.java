@@ -2,8 +2,9 @@ package com.blackwing.easyExploration;
 
 import com.blackwing.easyExploration.proxy.Common;
 import com.blackwing.easyExploration.util.EventHandlerBase;
-import com.blackwing.easyExploration.util.IHasModel;
+import com.blackwing.easyExploration.util.IHasRenderer;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -84,6 +85,7 @@ public class EasyExploration extends EventHandlerBase {
 
     public static final List<Item> ITEMS = new ArrayList<Item>();
     public static final List<Block> BLOCKS = new ArrayList<Block>();
+    public static final List<TileEntitySpecialRenderer> TILE_ENTITY_RENDERER = new ArrayList<TileEntitySpecialRenderer>();
 
     @SubscribeEvent
     public static void onItemRegister(RegistryEvent.Register<Item> event) {
@@ -98,14 +100,20 @@ public class EasyExploration extends EventHandlerBase {
     @SubscribeEvent
     public static void onModelRegister(ModelRegistryEvent event) {
         for (Item item : ITEMS) {
-            if (item instanceof IHasModel) {
-                ((IHasModel) item).registerModels();
+            if (item instanceof IHasRenderer) {
+                ((IHasRenderer) item).registerRenderer();
             }
         }
 
         for (Block block : BLOCKS) {
-            if (block instanceof IHasModel) {
-                ((IHasModel) block).registerModels();
+            if (block instanceof IHasRenderer) {
+                ((IHasRenderer) block).registerRenderer();
+            }
+        }
+
+        for (TileEntitySpecialRenderer renderer : TILE_ENTITY_RENDERER) {
+            if (renderer instanceof IHasRenderer) {
+                ((IHasRenderer) renderer).registerRenderer();
             }
         }
     }

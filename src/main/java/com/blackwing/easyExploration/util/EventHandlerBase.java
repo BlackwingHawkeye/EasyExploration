@@ -8,8 +8,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class EventHandlerBase {
+
+    protected final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
 
     /**
      * Returns true if the given entity is the player using this client

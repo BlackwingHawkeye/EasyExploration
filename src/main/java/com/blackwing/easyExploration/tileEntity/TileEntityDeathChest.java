@@ -4,16 +4,19 @@ import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.init.SoundEvents;
 import com.blackwing.easyExploration.inventory.ContainerDeathChest;
 import com.blackwing.easyExploration.inventory.InventoryDeathChest;
+import com.blackwing.easyExploration.tileEntity.base.TileEntityBase;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -29,13 +32,19 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class TileEntityDeathChest extends TileEntity implements ITickable, IInteractionObject {
+public class TileEntityDeathChest extends TileEntityBase implements ITickable, IInteractionObject {
+
+    public TileEntityDeathChest() {
+        super();
+        setId(EasyExploration.MODID + ":deathchest");
+    }
 
     private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
 
     private InventoryDeathChest inventory;
     private UUID ownerUUID;
     private String ownerName;
+
     public IItemHandler itemHandler;
     /**
      * The current angle of the lid (between 0 and 1)
@@ -55,7 +64,7 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
     public int ticksSinceSync;
 
     public void setInventory(InventoryDeathChest inventory) {
-        this.inventory.moveStacks(inventory);
+        this.inventory = inventory;
         this.inventory.setTileEntityDeathChest(this);
         log.info("moved items");
     }
@@ -255,5 +264,9 @@ public class TileEntityDeathChest extends TileEntity implements ITickable, IInte
         if (player.getUniqueID() != ownerUUID) return false;
 
         return inventory.isUsableByPlayer(player);
+    }
+
+    public static void registerFixesFurnace(DataFixer fixer) {
+        fixer.registerWalker(FixTypes.BLOCK_ENTITY, new ItemStackDataLists(TileEntityDeathChest.class, "Items"));
     }
 }

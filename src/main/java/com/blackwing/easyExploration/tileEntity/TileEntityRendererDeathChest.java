@@ -1,24 +1,21 @@
 package com.blackwing.easyExploration.tileEntity;
 
 import com.blackwing.easyExploration.block.BlockDeathChest;
-import com.blackwing.easyExploration.tileEntity.base.ITileEntityRender;
+import com.blackwing.easyExploration.tileEntity.base.ITileEntityRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelChest;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class TileEntityRendererDeathChest extends TileEntitySpecialRenderer<TileEntityDeathChest> implements ITileEntityRender<TileEntityDeathChest> {
+public class TileEntityRendererDeathChest extends TileEntitySpecialRenderer<TileEntityDeathChest> implements ITileEntityRenderer {
 
-    public String getId() {
-        return "deathchest";
-    }
-
-    public String getName() {
-        return "deathchest";
+    public void register() {
+        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityDeathChest.class, this);
     }
 
     private static final ResourceLocation DEATH_CHEST_TEXTURE = new ResourceLocation("textures/entity/chest/deathchest.png");

@@ -1,10 +1,8 @@
 package com.blackwing.easyExploration.inventory;
 
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -90,7 +88,7 @@ public class ContainerDeathChest extends Container {
     /**
      * Return this chest container's chest inventory.
      */
-    public IInventory getChestInventory() {
+    public InventoryDeathChest getChestInventory() {
         return chestInventory;
     }
 }

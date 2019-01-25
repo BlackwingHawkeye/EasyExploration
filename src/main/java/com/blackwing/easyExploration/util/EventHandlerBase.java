@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class EventHandlerBase {
 
-    protected final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
+    protected final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass().getSimpleName());
 
     /**
      * Returns true if the given entity is the player using this client
@@ -21,14 +21,14 @@ public abstract class EventHandlerBase {
      * @param entity Entity of the event
      * @return true if the given entity is the player using this client
      */
-    protected boolean isClientPlayer(Entity entity) {
+    protected boolean isNotClientPlayer(Entity entity) {
         try {
-            if (FMLClientHandler.instance().getClientPlayerEntity() == null) return true;
-            return entity.getUniqueID() == FMLClientHandler.instance().getClientPlayerEntity().getUniqueID();
+            if (FMLClientHandler.instance().getClientPlayerEntity() == null) return false;
+            return entity.getUniqueID() != FMLClientHandler.instance().getClientPlayerEntity().getUniqueID();
         } catch (Exception e) {
-            EasyExploration.logger.catching(e);
+            log.catching(e);
         }
-        return false;
+        return true;
     }
 
     @Mod.EventHandler

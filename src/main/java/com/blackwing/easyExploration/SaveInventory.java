@@ -1,8 +1,6 @@
-package com.blackwing.easyExploration.saveInventory;
+package com.blackwing.easyExploration;
 
-import com.blackwing.easyExploration.EasyExploration;
-import com.blackwing.easyExploration.config.Configuration;
-import com.blackwing.easyExploration.config.Configuration.InventoryOption;
+import com.blackwing.easyExploration.Configuration.InventoryOption;
 import com.blackwing.easyExploration.inventory.InventoryPlayerEE;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,6 +8,8 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SaveInventory {
+
+    protected static final Logger log = LogManager.getLogger(EasyExploration.MODID + ".SaveInventory" );
 
     /**
      * Singleton
@@ -51,7 +53,7 @@ public class SaveInventory {
         inventories.remove(player.getPersistentID());
     }
 
-    static int count(InventoryPlayer inv) {
+    public static int count(InventoryPlayer inv) {
         if (inv == null) return 0;
         if (inv.getSizeInventory() <= 0) return 0;
         AtomicInteger itemStackCount = new AtomicInteger(0);
@@ -61,7 +63,7 @@ public class SaveInventory {
         return itemStackCount.get();
     }
 
-    static int count(IInventory inv) {
+    public static int count(IInventory inv) {
         if (inv == null) return 0;
         if (inv.getSizeInventory() <= 0) return 0;
         AtomicInteger itemStackCount = new AtomicInteger(0);
@@ -72,22 +74,22 @@ public class SaveInventory {
 
     private static void moveStacks(NonNullList<ItemStack> target, NonNullList<ItemStack> source) {
         if (target == null) {
-            EasyExploration.logger.error("Target inventory missing.");
+            log.error("Target inventory missing.");
             return;
         }
         if (source == null) {
-            EasyExploration.logger.error("Source inventory missing.");
+            log.error("Source inventory missing.");
             return;
         }
         if (target.size() != source.size()) {
-            EasyExploration.logger.error("Target inventory has wrong size.");
+            log.error("Target inventory has wrong size.");
             return;
         }
         for (int i = 0; i < target.size(); ++i) target.set(i, source.get(i));
         source.clear();
     }
 
-    static InventoryPlayerEE keepInventory(EntityPlayer player) {
+    public static InventoryPlayerEE keepInventory(EntityPlayer player) {
         InventoryPlayerEE inventory = new InventoryPlayerEE(player);
 
         if (config.equipment == InventoryOption.KEEP) {
@@ -117,7 +119,7 @@ public class SaveInventory {
         return inventory;
     }
 
-    static void destroyVanishingCursedItems(InventoryPlayer inventory) {
+    public static void destroyVanishingCursedItems(InventoryPlayer inventory) {
         for (int i = 0; i < inventory.getSizeInventory(); ++i) {
             ItemStack itemstack = inventory.getStackInSlot(i);
 
@@ -126,6 +128,4 @@ public class SaveInventory {
             }
         }
     }
-
-
 }

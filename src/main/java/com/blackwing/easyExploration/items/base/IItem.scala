@@ -1,21 +1,21 @@
 package com.blackwing.easyExploration.items.base
 
-import com.blackwing.easyExploration.EasyExploration
-import com.blackwing.easyExploration.util.IHasRenderer
+import com.blackwing.easyExploration.init.RegisterHandler
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.Item
 
-trait IItem extends Item with IHasRenderer {
+trait IItem extends Item {
 
-	def init(): Unit = {
-		setUnlocalizedName(getName)
-		setRegistryName(getName)
-		setCreativeTab(CreativeTabs.MATERIALS)
+	def setId(id: String): Unit
 
-		EasyExploration.ITEMS.add(this)
-	}
+	def getId: String
 
-	def registerRenderer(): Unit = {
-		EasyExploration.proxy.registerItemRenderer(this, 0, getId)
+	def init(id: String, tab: CreativeTabs): Unit = {
+		setId(id)
+		setUnlocalizedName(id)
+		setRegistryName(id)
+		setCreativeTab(tab)
+
+		RegisterHandler.ITEMS.add(this)
 	}
 }

@@ -2,13 +2,13 @@ package com.blackwing.easyExploration.block;
 
 import com.blackwing.easyExploration.EasyExploration;
 import com.blackwing.easyExploration.block.base.ChestBase;
+import com.blackwing.easyExploration.inventory.InventoryDeathChest;
 import com.blackwing.easyExploration.tileEntity.TileEntityDeathChest;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
@@ -31,18 +31,8 @@ public class BlockDeathChest extends ChestBase {
 
     private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
 
-    @Override
-    public String getId() {
-        return "deathchest";
-    }
-
-    @Override
-    public String getName() {
-        return "deathchest";
-    }
-
     public BlockDeathChest() {
-        super(BlockChest.Type.BASIC);
+        super(EasyExploration.MODID + ":deathchest", BlockChest.Type.BASIC);
         setLightLevel(8);
         setBlockUnbreakable();
         setResistance(10);
@@ -60,10 +50,18 @@ public class BlockDeathChest extends ChestBase {
     }
 
     /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     */
+    public TileEntity createNewTileEntity(World worldIn, int meta) {
+        return new TileEntityDeathChest();
+    }
+
+    /**
      * Called when the block is right clicked by a player.
      */
     @Override
     public boolean onBlockActivated(World world, @NotNull BlockPos pos, IBlockState state, @NotNull EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        log.info(this.getClass().getName() + " onBlockActivated.");
         // get the tile entity
         TileEntity tileEntity = world.getTileEntity(pos);
         if (!(tileEntity instanceof TileEntityDeathChest)) return true;
@@ -93,7 +91,7 @@ public class BlockDeathChest extends ChestBase {
     }
 
     @Nullable
-    public IInventory getInventory(@NotNull World world, @NotNull BlockPos pos) {
+    public InventoryDeathChest getInventory(@NotNull World world, @NotNull BlockPos pos) {
         TileEntity tileEntity = world.getTileEntity(pos);
 
         if (tileEntity == null) {
@@ -117,6 +115,7 @@ public class BlockDeathChest extends ChestBase {
      */
     public BlockPos placeDeathChest(@NotNull EntityPlayer player) {
         ItemStack deathStack = new ItemStack(this);
+
         BlockPos pos = new BlockPos(player.posX, player.posY, player.posZ);
         float hitX = (float) pos.getX();
         float hitY = (float) pos.getY();
@@ -127,8 +126,11 @@ public class BlockDeathChest extends ChestBase {
         AtomicReference<IBlockState> blockState = new AtomicReference<>(getStateForPlacement(
                 player.world, pos, player.getHorizontalFacing(), hitX, hitY, hitZ, 0, player, EnumHand.MAIN_HAND));
 
-        if (new ItemBlock(this).placeBlockAt(deathStack, player, player.world, pos, player.getHorizontalFacing(), hitX, hitY, hitZ, blockState.get())) {
+        ItemBlock itemBlock = new ItemBlock(this);
+        log.info("itemBlock " + itemBlock.getRegistryName());
+        if (itemBlock.placeBlockAt(deathStack, player, player.world, pos, player.getHorizontalFacing(), hitX, hitY, hitZ, blockState.get())) {
             blockState.set(player.world.getBlockState(pos));
+            log.info("block from state: " + blockState.get().getBlock().getClass());
             SoundType soundtype = blockState.get().getBlock().getSoundType(blockState.get(), player.world, pos, player);
             player.world.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
             deathStack.shrink(1);

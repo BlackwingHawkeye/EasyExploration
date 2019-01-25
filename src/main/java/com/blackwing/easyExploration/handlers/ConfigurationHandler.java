@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration.config;
+package com.blackwing.easyExploration.handlers;
 
 import com.blackwing.easyExploration.util.EventHandlerBase;
 import net.minecraftforge.common.config.Config;
@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import static com.blackwing.easyExploration.EasyExploration.MODID;
 
-public class ConfigurationHandlerCommon extends EventHandlerBase {
+public class ConfigurationHandler extends EventHandlerBase {
 
     @Mod.EventHandler
     public void onInit(FMLInitializationEvent event) {

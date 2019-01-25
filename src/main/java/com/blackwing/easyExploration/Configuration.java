@@ -1,4 +1,4 @@
-package com.blackwing.easyExploration.config;
+package com.blackwing.easyExploration;
 
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.*;

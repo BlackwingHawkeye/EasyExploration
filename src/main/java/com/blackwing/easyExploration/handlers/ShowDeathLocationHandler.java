@@ -1,6 +1,6 @@
-package com.blackwing.easyExploration.showDeathLocation;
+package com.blackwing.easyExploration.handlers;
 
-import com.blackwing.easyExploration.config.Configuration;
+import com.blackwing.easyExploration.Configuration;
 import com.blackwing.easyExploration.util.EventHandlerBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
@@ -8,7 +8,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-public class ShowDeathLocationHandlerCommon extends EventHandlerBase {
+public class ShowDeathLocationHandler extends EventHandlerBase {
 
     private TextComponentString getMessage(EntityPlayerMP player) {
         return new TextComponentString(player.getName() + " died in "
@@ -19,6 +19,8 @@ public class ShowDeathLocationHandlerCommon extends EventHandlerBase {
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
+        // only deal with your own stuff if your are on client side
+        if(event.getEntity().world.isRemote && isNotClientPlayer(event.getEntity())) return;
         // someone else / something else died
         if (!(event.getEntity() instanceof EntityPlayerMP)) return;
         EntityPlayerMP player = (EntityPlayerMP) event.getEntity();

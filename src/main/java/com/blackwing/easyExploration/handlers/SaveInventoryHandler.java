@@ -1,7 +1,7 @@
-package com.blackwing.easyExploration.saveInventory;
+package com.blackwing.easyExploration.handlers;
 
-import com.blackwing.easyExploration.EasyExploration;
-import com.blackwing.easyExploration.config.Configuration;
+import com.blackwing.easyExploration.Configuration;
+import com.blackwing.easyExploration.SaveInventory;
 import com.blackwing.easyExploration.init.Blocks;
 import com.blackwing.easyExploration.inventory.InventoryPlayerEE;
 import com.blackwing.easyExploration.tileEntity.TileEntityDeathChest;
@@ -21,15 +21,11 @@ import net.minecraftforge.event.entity.player.PlayerEvent.LoadFromFile;
 import net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 
-public class SaveInventoryHandlerCommon extends EventHandlerBase {
-
-    private final Logger log = LogManager.getLogger(EasyExploration.MODID + "." + getClass());
+public class SaveInventoryHandler extends EventHandlerBase {
 
     private static final Configuration.SubCategorySaveInventory config = Configuration.saveInventory;
     private static final FileStorage fileStorage = FileStorage.instance(FileStorage.FEATURE_KEY_SAVEINVENTORY);
@@ -53,6 +49,8 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
      */
     @SubscribeEvent
     public void onLoad(LoadFromFile event) {
+        // only deal with your own stuff if your are on client side
+        if (event.getEntity().world.isRemote && isNotClientPlayer(event.getEntity())) return;
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
@@ -61,7 +59,7 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         try {
             final File playerFile = fileStorage.getPlayerSaveFile(event);
             // this is legit if the player is new in this game world
-            if (!playerFile.exists()) EasyExploration.logger.warn("Player file not found. " + playerFile.getPath());
+            if (!playerFile.exists()) log.warn("Player file not found. " + playerFile.getPath());
             else {
                 final NBTTagCompound compound = CompressedStreamTools.read(playerFile);
                 if (compound == null) throw new IOException("Can't read from file " + playerFile.getPath());
@@ -69,11 +67,11 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
                 playerInventory.readFromNBT(compound.getTagList("Inventory", 10));
                 playerInventory.currentItem = compound.getInteger("SelectedItemSlot");
 
-                EasyExploration.logger.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+                log.info("Loaded {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
             }
         } catch (final Exception e) {
-            EasyExploration.logger.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
-            EasyExploration.logger.catching(e);
+            log.error("Could not load inventory for {}. {}", player.getName(), e.getMessage());
+            log.catching(e);
         } finally {
             SaveInventory.put(player, playerInventory);
         }
@@ -89,19 +87,21 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         if (canNotDo(event.player)) return;
         EntityPlayerMP player = (EntityPlayerMP) event.player;
 
-        EasyExploration.logger.info("Player {} logged in. Sending sync package to player client.", player.getName());
+        log.info("Player {} logged in. Sending sync package to player client.", player.getName());
         // Send Client a package containing the inventory to be synced
         player.sendContainerToPlayer(player.inventoryContainer);
     }
 
     @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
+        // only deal with your own stuff if your are on client side
+        if (event.getEntity().world.isRemote && isNotClientPlayer(event.getEntity())) return;
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = (EntityPlayer) event.getEntity();
         final int totalInventoryCount = SaveInventory.count(player.inventory);
 
-        EasyExploration.logger.info(player.getName() + " died. Attempting to save inventory.");
+        log.info(player.getName() + " died. Attempting to save inventory.");
         SaveInventory.destroyVanishingCursedItems(player.inventory);
         InventoryPlayerEE inventory = SaveInventory.keepInventory(player);
 
@@ -117,24 +117,18 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
                 log.error("tile entity at block death chest position is not a death chest: " + tileEntity.getClass());
                 return;
             }
-            /*
-            [11:15:03] [Server thread/INFO] [easyexploration]: Player905 died. Attempting to save inventory.
-[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.inventory.InventoryDeathChest]: created death chest inventory
-[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.block.BlockDeathChest]: BlockDeathChest created
-[11:15:03] [Server thread/INFO] [easyexploration.class com.blackwing.easyExploration.block.BlockDeathChest]: death chest placed
-[11:15:03] [Server thread/ERROR] [easyexploration.class com.blackwing.easyExploration.saveInventory.SaveInventoryHandlerCommon]: tile entity at block death chest position is not a death chest: class net.minecraft.tileentity.TileEntityChest
-
-             */
             TileEntityDeathChest tileEntityDeathChest = (TileEntityDeathChest) tileEntity;
             tileEntityDeathChest.setOwner(player);
             tileEntityDeathChest.setInventory(inventory.inventoryDeathChest);
         }
 
-        EasyExploration.logger.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(inventory), inventory.inventoryDeathChest.stackCount, totalInventoryCount);
+        log.info("Kept {} and stored {} of {} item stacks.", SaveInventory.count(inventory), inventory.inventoryDeathChest.stackCount, totalInventoryCount);
     }
 
     @SubscribeEvent
     public void onClone(Clone event) {
+        // only deal with your own stuff if your are on client side
+        if (event.getEntity().world.isRemote && isNotClientPlayer(event.getEntity())) return;
         // noone died
         if (!event.isWasDeath()) return;
         // should we do something?
@@ -142,9 +136,9 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
         final EntityPlayer player = event.getEntityPlayer();
         final InventoryPlayerEE playerInventory = SaveInventory.get(player);
 
-        EasyExploration.logger.info(player.getName() + " respawned. Attempting to restore inventory.");
+        log.info(player.getName() + " respawned. Attempting to restore inventory.");
         player.inventory.copyInventory(playerInventory);
-        EasyExploration.logger.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
+        log.info("Restored {} of {} item stacks.", SaveInventory.count(player.inventory), SaveInventory.count(playerInventory));
 
         SaveInventory.remove(player);
     }
@@ -156,6 +150,8 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
      */
     @SubscribeEvent
     public void onSave(SaveToFile event) {
+        // only deal with your own stuff if your are on client side
+        if (event.getEntity().world.isRemote && isNotClientPlayer(event.getEntity())) return;
         // should we do something?
         if (canNotDo(event.getEntity())) return;
         final EntityPlayer player = event.getEntityPlayer();
@@ -168,10 +164,10 @@ public class SaveInventoryHandlerCommon extends EventHandlerBase {
 
             CompressedStreamTools.safeWrite(compound, fileStorage.getPlayerSaveFile(event));
 
-            EasyExploration.logger.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
+            log.info("Saved {} item stacks for {}.", SaveInventory.count(playerInventory), player.getName());
         } catch (Exception e) {
-            EasyExploration.logger.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
-            EasyExploration.logger.catching(e);
+            log.error("Could not save inventory for {}. {}", player.getName(), e.getMessage());
+            log.catching(e);
         }
     }
 

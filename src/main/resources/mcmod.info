@@ -5,14 +5,14 @@
     "description": "Makes exploring easier.",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "",
-    "updateUrl": "",
-    "updateJSON": "",
+    "url": "https://minecraft.curseforge.com/projects/easy-exploration/",
+    "updateUrl": "https://minecraft.curseforge.com/projects/easy-exploration/files",
+    "updateJSON": "https://minecraft.curseforge.com/projects/easy-exploration/files/update.json",
     "authorList": [
       "BlackwingHawkeye"
     ],
     "credits": "The Forge and FML guys, for creating mod support. And BlackwingHawkeye for creating this mod.",
-    "logoFile": "assets/easyExploration/textures/BHE.png",
+    "logoFile": "assets/easyExploration/textures/logo/BlackwingHawk.png",
     "screenshots": [],
     "parent": "",
     "useDependencyInformation": false,

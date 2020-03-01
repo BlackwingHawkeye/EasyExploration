@@ -1,0 +1,54 @@
+{
+  "_comment": "config",
+  "config.easy_exploration.enabled": "Enabled",
+  "config.easy_exploration.enabled.tooltip": "Toggle feature on/off.",
+
+  "config.easy_exploration.saveInventory": "Save Inventory",
+  "config.easy_exploration.saveInventory.tooltip": "Configure what happens with your items when you die.",
+  "config.easy_exploration.saveInventory.keep": "Keep",
+  "config.easy_exploration.saveInventory.keep.tooltip": "Items stay on your avatar.",
+  "config.easy_exploration.saveInventory.save": "Store",
+  "config.easy_exploration.saveInventory.save.tooltip": "Items are stored in a loot crate at death location.",
+  "config.easy_exploration.saveInventory.drop": "Drop",
+  "config.easy_exploration.saveInventory.drop.tooltip": "Items get dropped at death location.",
+  "config.easy_exploration.saveInventory.equipment": "Equipment",
+  "config.easy_exploration.saveInventory.equipment.tooltip": "What to do with equipped items (item in armor and hotbar slots)?",
+  "config.easy_exploration.saveInventory.loot": "Inventory",
+  "config.easy_exploration.saveInventory.loot.tooltip": "What to do with the loot in the inventory?",
+  "config.easy_exploration.saveInventory.xp": "Experience",
+  "config.easy_exploration.saveInventory.xp.tooltip": "What to do with your XP?",
+
+  "config.easy_exploration.showDeathLocation": "Show Death Location",
+  "config.easy_exploration.showDeathLocation.tooltip": "Configure who should see your location of death.",
+  "config.easy_exploration.showDeathLocation.noone": "Noone",
+  "config.easy_exploration.showDeathLocation.noone.tooltip": "Disables the feature. Death location is not shown.",
+  "config.easy_exploration.showDeathLocation.player": "Player",
+  "config.easy_exploration.showDeathLocation.player.tooltip": "Only the player who died receives the death location message.",
+  "config.easy_exploration.showDeathLocation.team": "Team",
+  "config.easy_exploration.showDeathLocation.team.tooltip": "The team of the player who died receives the death location message.",
+  "config.easy_exploration.showDeathLocation.everyone": "Everyone",
+  "config.easy_exploration.showDeathLocation.everyone.tooltip": "Every player receives the death location message.",
+  "config.easy_exploration.showDeathLocation.sendTo": "send to",
+  "config.easy_exploration.showDeathLocation.sendTo.tooltip": "Who should see the death location message?",
+
+  "config.easy_exploration.sleepingBags": "Sleeping Bags",
+  "config.easy_exploration.sleepingBags.tooltip": "Configure your travel beds.",
+
+  "config.easy_exploration.showDamage": "Show damage",
+  "config.easy_exploration.showDamage.tooltip": "Configure damage information.",
+
+  "_comment": "Items",
+  "item.easy_exploration.ruby": "Ruby",
+
+  "_comment": "Blocks",
+  "block.easy_exploration.deathchest": "Death Chest of %s",
+
+  "_comment": "Tools",
+  "item.easy_exploration.ruby_sword": "Ruby Sword",
+
+  "_comment": "Armor",
+  "item.easy_exploration.ruby_helmet": "Ruby Helmet",
+
+  "_comment": "Food",
+  "item.easy_exploration.evil_apple": "Evil Apple"
+}

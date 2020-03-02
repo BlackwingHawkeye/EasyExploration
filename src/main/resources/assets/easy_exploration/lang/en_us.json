@@ -37,7 +37,11 @@
   "config.easy_exploration.showDamage": "Show damage",
   "config.easy_exploration.showDamage.tooltip": "Configure damage information.",
 
+  "_comment": "ItemGroup",
+  "itemGroup.easy_exploration": "Easy Exploration",
+
   "_comment": "Items",
+  "item.easy_exploration.example_item": "Example Item",
   "item.easy_exploration.ruby": "Ruby",
 
   "_comment": "Blocks",

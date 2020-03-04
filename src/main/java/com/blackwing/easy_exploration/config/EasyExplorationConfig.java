@@ -5,6 +5,8 @@ import com.blackwing.easy_exploration.EasyExploration;
 /**
  * This holds the runtime values for our config. These values should never be changed from outside this package.
  * This can be split into multiple classes (Server, Client, Player, Common) but has been kept in one class for simplicity.
+ *
+ * TODO: Figure out how to do sub categories
  */
 public final class EasyExplorationConfig {
 

@@ -1,48 +1,57 @@
 package com.blackwing.easy_exploration.config;
 
 import com.blackwing.easy_exploration.EasyExploration;
-import net.minecraft.item.DyeColor;
 import net.minecraftforge.common.ForgeConfigSpec;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * For configuration settings that change the behaviour of code on the LOGICAL CLIENT.
  */
 final class ClientConfig {
 
-    final ForgeConfigSpec.BooleanValue clientBoolean;
-    final ForgeConfigSpec.ConfigValue<List<String>> clientStringList;
-    final ForgeConfigSpec.EnumValue<DyeColor> clientDyeColorEnum;
+    final ForgeConfigSpec.BooleanValue clientSaveInventoryEnabled;
+    final ForgeConfigSpec.EnumValue<EasyExplorationConfig.InventoryOption> clientSaveInventoryEquipment;
+    final ForgeConfigSpec.EnumValue<EasyExplorationConfig.InventoryOption> clientSaveInventoryLoot;
+    final ForgeConfigSpec.EnumValue<EasyExplorationConfig.InventoryOption> clientSaveInventoryXP;
 
-    final ForgeConfigSpec.BooleanValue modelTranslucency;
-    final ForgeConfigSpec.DoubleValue modelScale;
+    final ForgeConfigSpec.EnumValue<EasyExplorationConfig.ShowDeathLocationOption> clientShowDeathLocation;
+
+    final ForgeConfigSpec.BooleanValue clientSleepingBagsEnabled;
+
+    final ForgeConfigSpec.BooleanValue clientShowDamage;
 
     ClientConfig(final ForgeConfigSpec.Builder builder) {
         builder.push("general");
-        clientBoolean = builder
-                .comment("An example boolean in the client config")
-                .translation(EasyExploration.MODID + ".config.clientBoolean")
-                .define("clientBoolean", true);
-        clientStringList = builder
-                .comment("An example list of Strings in the client config")
-                .translation(EasyExploration.MODID + ".config.clientStringList")
-                .define("clientStringList", new ArrayList<>());
-        clientDyeColorEnum = builder
-                .comment("An example DyeColor enum in the client config")
-                .translation(EasyExploration.MODID + ".config.clientDyeColorEnum")
-                .defineEnum("clientDyeColorEnum", DyeColor.WHITE);
+        clientSaveInventoryEnabled = builder
+                .comment("Configure what happens with your items when you die.", "toggle feature on/off")
+                .translation(EasyExploration.MODID + ".config.saveInventory")
+                .define("saveInventoryEnabled", true);
+        clientSaveInventoryEquipment = builder
+                .comment("What to do with equipped items (item in armor and hotbar slots)?", "\"drop\" => item get dropped at death location; \"keep\" => items stay on your avatar; \"save\" => items are stored in a loot crate at death location")
+                .translation(EasyExploration.MODID + ".config.saveInventory.equipment")
+                .defineEnum("saveInventoryEquipment", EasyExplorationConfig.InventoryOption.KEEP);
+        clientSaveInventoryLoot = builder
+                .comment("What to do with the loot in the inventory?", "\"drop\" => item get dropped at death location; \"keep\" => items stay on your avatar; \"save\" => items are stored in a loot crate at death location")
+                .translation(EasyExploration.MODID + ".config.saveInventory.loot")
+                .defineEnum("saveInventoryLoot", EasyExplorationConfig.InventoryOption.SAVE);
+        clientSaveInventoryXP = builder
+                .comment("What to do with your XP?", "\"drop\" => item get dropped at death location; \"keep\" => items stay on your avatar; \"save\" => items are stored in a loot crate at death location")
+                .translation(EasyExploration.MODID + ".config.saveInventory.xp")
+                .defineEnum("saveInventoryXP", EasyExplorationConfig.InventoryOption.DROP);
 
-        modelTranslucency = builder
-                .comment("If the model should be rendered translucent")
-                .translation(EasyExploration.MODID + ".config.modelTranslucency")
-                .define("modelTranslucency", true);
-        modelScale = builder
-                .comment("The scale to render the model at")
-                .translation(EasyExploration.MODID + ".config.modelScale")
-                .defineInRange("modelScale", 0.0625F, 0.0001F, 100F);
+        clientShowDeathLocation = builder
+                .comment("Configure who should receive your location of death.")
+                .translation(EasyExploration.MODID + ".config.showDeathLocation")
+                .defineEnum("showDeathLocation", EasyExplorationConfig.ShowDeathLocationOption.TEAM);
+
+        clientSleepingBagsEnabled = builder
+                .comment("Configure your travel beds.", "toggle feature on/off")
+                .translation(EasyExploration.MODID + ".config.sleepingBags")
+                .define("sleepingBags", true);
+
+        clientShowDamage = builder
+                .comment("Configure damage information.", "toggle feature on/off")
+                .translation(EasyExploration.MODID + ".config.showDamage")
+                .define("showDamage", true);
         builder.pop();
     }
-
 }

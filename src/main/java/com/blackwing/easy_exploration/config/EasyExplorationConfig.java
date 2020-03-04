@@ -1,8 +1,6 @@
 package com.blackwing.easy_exploration.config;
 
-import net.minecraft.item.DyeColor;
-
-import java.util.List;
+import com.blackwing.easy_exploration.EasyExploration;
 
 /**
  * This holds the runtime values for our config. These values should never be changed from outside this package.
@@ -10,20 +8,57 @@ import java.util.List;
  */
 public final class EasyExplorationConfig {
 
-	// Client
-	public static boolean clientBoolean;
-	public static List<String> clientStringList;
-	public static DyeColor clientDyeColorEnum;
+    enum InventoryOption {
+        KEEP("keep", "items stay on your avatar"),
+        SAVE("store", "items are stored in a loot crate at death location"),
+        DROP("keep", "item get dropped at death location");
 
-	public static boolean modelTranslucency;
-	public static float modelScale;
+        private final String translationKey;
+        private final String comment;
 
-	// Server
-	public static boolean serverBoolean;
-	public static List<String> serverStringList;
-	public static DyeColor serverDyeColorEnum;
+        InventoryOption(String translationKeyIn, String commentIn) {
+            this.translationKey = EasyExploration.MODID + ".inventoryOption." + translationKeyIn;
+            this.comment = commentIn;
+        }
+    }
 
-	public static int electricFurnaceEnergySmeltCostPerTick = 100;
-	public static int heatCollectorTransferAmountPerTick = 100;
+    enum ShowDeathLocationOption {
+        NOONE("noone", "Disables the feature. Death location is not shown."),
+        PLAYER("player", "Only the player who died receives the death location message."),
+        TEAM("team", "The team of the player who died receives the death location message."),
+        EVERYONE("everyone", "Every player receives the death location message.");
+
+        private final String translationKey;
+        private final String comment;
+
+        ShowDeathLocationOption(String translationKeyIn, String commentIn) {
+            this.translationKey = EasyExploration.MODID + ".showDeathLocationOption." + translationKeyIn;
+            this.comment = commentIn;
+        }
+    }
+
+    // Client
+    public static boolean clientSaveInventoryEnabled;
+    public static InventoryOption clientSaveInventoryEquipment;
+    public static InventoryOption clientSaveInventoryLoot;
+    public static InventoryOption clientSaveInventoryXP;
+
+    public static ShowDeathLocationOption clientShowDeathLocation;
+
+    public static boolean clientSleepingBagsEnabled;
+
+    public static boolean clientShowDamage;
+
+    // Server
+    public static boolean serverSaveInventoryEnabled;
+    public static InventoryOption serverSaveInventoryEquipment;
+    public static InventoryOption serverSaveInventoryLoot;
+    public static InventoryOption serverSaveInventoryXP;
+
+    public static ShowDeathLocationOption serverShowDeathLocation;
+
+    public static boolean serverSleepingBagsEnabled;
+
+    public static boolean serverShowDamage;
 
 }
